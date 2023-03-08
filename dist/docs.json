@@ -1,0 +1,110 @@
+{
+  "api": {
+    "name": "AudioTogglePlugin",
+    "slug": "audiotoggleplugin",
+    "docs": "",
+    "tags": [],
+    "methods": [
+      {
+        "name": "setMode",
+        "signature": "(data: { mode: AUDIO_MODE; }) => Promise<void>",
+        "parameters": [
+          {
+            "name": "data",
+            "docs": "",
+            "type": "{ mode: AUDIO_MODE; }"
+          }
+        ],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [
+          "AUDIO_MODE"
+        ],
+        "slug": "setmode"
+      },
+      {
+        "name": "start",
+        "signature": "() => Promise<{ device: any; }>",
+        "parameters": [],
+        "returns": "Promise<{ device: any; }>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "start"
+      },
+      {
+        "name": "stop",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "stop"
+      },
+      {
+        "name": "getDevices",
+        "signature": "() => Promise<{ devices: any[]; }>",
+        "parameters": [],
+        "returns": "Promise<{ devices: any[]; }>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "getdevices"
+      },
+      {
+        "name": "getSelectedDevice",
+        "signature": "() => Promise<{ device: any; }>",
+        "parameters": [],
+        "returns": "Promise<{ device: any; }>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "getselecteddevice"
+      }
+    ],
+    "properties": []
+  },
+  "interfaces": [],
+  "enums": [
+    {
+      "name": "AUDIO_MODE",
+      "slug": "audio_mode",
+      "members": [
+        {
+          "name": "EARPIECE",
+          "value": "'EARPIECE'",
+          "tags": [],
+          "docs": ""
+        },
+        {
+          "name": "SPEAKER",
+          "value": "'SPEAKER'",
+          "tags": [],
+          "docs": ""
+        },
+        {
+          "name": "NORMAL",
+          "value": "'NORMAL'",
+          "tags": [],
+          "docs": ""
+        },
+        {
+          "name": "RINGTONE",
+          "value": "'RINGTONE'",
+          "tags": [],
+          "docs": ""
+        },
+        {
+          "name": "BLUETOOTH",
+          "value": "'BLUETOOTH'",
+          "tags": [],
+          "docs": ""
+        }
+      ]
+    }
+  ],
+  "typeAliases": [],
+  "pluginConfigs": []
+}
