@@ -28,7 +28,6 @@ public class AudioTogglePlugin extends Plugin {
 
         audioToggle.start(
             (audioDevices, audioDevice) -> {
-                audioToggle.activate();
                 JSObject res = new JSObject();
                 List<String> availableDevices = audioDevices.stream().map(device -> device.getName()).collect(Collectors.toList());
                 res.put("availableDevices", availableDevices);
@@ -46,6 +45,28 @@ public class AudioTogglePlugin extends Plugin {
         }
 
         audioToggle.stop();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void activate(PluginCall call) {
+        if (getActivity().isFinishing()) {
+            call.reject("Audio toggle plugin error: App is finishing");
+            return;
+        }
+
+        audioToggle.activate();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void deactivate(PluginCall call) {
+        if (getActivity().isFinishing()) {
+            call.reject("Audio toggle plugin error: App is finishing");
+            return;
+        }
+
+        audioToggle.deactivate();
         call.resolve();
     }
 

@@ -74,14 +74,12 @@ public class AudioToggle {
         }
     };
 
-    private boolean loggingEnabled;
-
     public boolean isLoggingEnabled() {
-        return this.logger.isLoggingEnabled();
+        return logger.isLoggingEnabled();
     }
 
     public void setLoggingEnabled(boolean value) {
-        this.logger.setLoggingEnabled(value);
+        logger.setLoggingEnabled(value);
     }
 
     AudioDevice selectedAudioDevice = selectedDevice;
@@ -119,7 +117,7 @@ public class AudioToggle {
      */
     public void start(AudioDeviceChangeListener listener) {
         audioDeviceChangeListener = listener;
-        switch (this.state) {
+        switch (state) {
             case STOPPED:
                 enumerateDevices(null);
                 if (bluetoothHeadsetManager != null) {
@@ -129,7 +127,7 @@ public class AudioToggle {
                 state = State.STARTED;
                 break;
             default:
-                this.logger.d(TAG, "Redundant start() invocation while already in the started or activated state");
+                logger.d(TAG, "Redundant start() invocation while already in the started or activated state");
         }
     }
 
@@ -148,7 +146,7 @@ public class AudioToggle {
                 closeListeners();
                 break;
             case STOPPED:
-                this.logger.d(TAG, "Redundant stop() invocation while already in the stopped state");
+                logger.d(TAG, "Redundant stop() invocation while already in the stopped state");
                 break;
         }
     }
@@ -225,7 +223,7 @@ public class AudioToggle {
         }
 
         if (selectedDevice != audioDevice) {
-            this.logger.d(TAG, "Selected AudioDevice = " + audioDevice);
+            logger.d(TAG, "Selected AudioDevice = " + audioDevice);
             userSelectedDevice = audioDevice;
             enumerateDevices(null);
         }
@@ -315,7 +313,7 @@ public class AudioToggle {
         }
 
         // Select the audio device
-        this.logger.d(TAG, "Current user selected AudioDevice = " + userSelectedDevice);
+        logger.d(TAG, "Current user selected AudioDevice = " + userSelectedDevice);
         if (userSelectedDevice != null) {
             selectedDevice = userSelectedDevice;
         } else if (mutableAudioDevices.size() > 0) {
@@ -376,7 +374,7 @@ public class AudioToggle {
             }
         }
 
-        this.logger.d(TAG, "Available AudioDevice list updated: " + availableAudioDevices);
+        logger.d(TAG, "Available AudioDevice list updated: " + availableAudioDevices);
     }
 
     private boolean userSelectedDevicePresent(List<AudioDevice> audioDevices) {
