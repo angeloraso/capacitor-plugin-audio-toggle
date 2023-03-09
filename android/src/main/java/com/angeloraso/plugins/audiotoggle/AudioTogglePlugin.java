@@ -28,6 +28,7 @@ public class AudioTogglePlugin extends Plugin {
 
         audioToggle.start(
             (audioDevices, audioDevice) -> {
+                audioToggle.activate();
                 JSObject res = new JSObject();
                 List<String> availableDevices = audioDevices.stream().map(device -> device.getName()).collect(Collectors.toList());
                 res.put("availableDevices", availableDevices);
@@ -92,13 +93,5 @@ public class AudioTogglePlugin extends Plugin {
         } else {
             call.reject("Audio toggle plugin error: Audio mode is required");
         }
-    }
-
-    /**
-     * Called when the activity will be destroyed.
-     */
-    @Override
-    public void handleOnDestroy() {
-        audioToggle.stop();
     }
 }
