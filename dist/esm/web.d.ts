@@ -7,6 +7,8 @@ export declare class AudioToggleWeb extends WebPlugin implements AudioTogglePlug
         selectedDevice: DeviceName;
     }>;
     stop(): Promise<void>;
+    activate(): Promise<void>;
+    deactivate(): Promise<void>;
     getDevices(): Promise<{
         availableDevices: DeviceName[];
     }>;

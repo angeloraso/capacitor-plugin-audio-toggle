@@ -16,6 +16,8 @@ npx cap sync
 * [`selectDevice(...)`](#selectdevice)
 * [`start()`](#start)
 * [`stop()`](#stop)
+* [`activate()`](#activate)
+* [`deactivate()`](#deactivate)
 * [`getDevices()`](#getdevices)
 * [`getSelectedDevice()`](#getselecteddevice)
 * [Enums](#enums)
@@ -53,6 +55,24 @@ start() => Promise<{ availableDevices: DeviceName[]; selectedDevice: DeviceName;
 
 ```typescript
 stop() => Promise<void>
+```
+
+--------------------
+
+
+### activate()
+
+```typescript
+activate() => Promise<void>
+```
+
+--------------------
+
+
+### deactivate()
+
+```typescript
+deactivate() => Promise<void>
 ```
 
 --------------------
