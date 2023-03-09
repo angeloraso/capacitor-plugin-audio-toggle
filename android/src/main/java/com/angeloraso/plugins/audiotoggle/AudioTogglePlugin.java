@@ -7,6 +7,7 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CapacitorPlugin(name = "AudioToggle")
 public class AudioTogglePlugin extends Plugin {
@@ -28,7 +29,9 @@ public class AudioTogglePlugin extends Plugin {
         audioToggle.start(
             (audioDevices, audioDevice) -> {
                 JSObject res = new JSObject();
-                res.put("device", audioDevice);
+                List<String> availableDevices = audioDevices.stream().map(device -> device.getName()).collect(Collectors.toList());
+                res.put("availableDevices", availableDevices);
+                res.put("selectedDevice", audioDevice.getName());
                 call.resolve(res);
             }
         );
@@ -53,8 +56,11 @@ public class AudioTogglePlugin extends Plugin {
         }
 
         JSObject res = new JSObject();
-        List<AudioDevice> devices = audioToggle.availableAudioDevices;
-        res.put("devices", devices);
+        List<String> availableDevices = audioToggle.availableAudioDevices
+            .stream()
+            .map(device -> device.getName())
+            .collect(Collectors.toList());
+        res.put("availableDevices", availableDevices);
         call.resolve(res);
     }
 
@@ -67,21 +73,21 @@ public class AudioTogglePlugin extends Plugin {
 
         JSObject res = new JSObject();
         AudioDevice device = audioToggle.selectedAudioDevice;
-        res.put("device", device);
+        res.put("selectedDevice", device.getName());
         call.resolve(res);
     }
 
     @PluginMethod
-    public void setMode(PluginCall call) {
+    public void selectDevice(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject("Audio toggle plugin error: App is finishing");
             return;
         }
 
-        String mode = call.getString("mode");
+        String device = call.getString("device");
 
-        if (mode != null) {
-            audioToggle.setMode(mode);
+        if (device != null) {
+            audioToggle.selectDevice(device);
             call.resolve();
         } else {
             call.reject("Audio toggle plugin error: Audio mode is required");

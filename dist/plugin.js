@@ -1,21 +1,20 @@
 var capacitorAudioToggle = (function (exports, core) {
     'use strict';
 
-    exports.AUDIO_MODE = void 0;
-    (function (AUDIO_MODE) {
-        AUDIO_MODE["EARPIECE"] = "EARPIECE";
-        AUDIO_MODE["SPEAKER"] = "SPEAKER";
-        AUDIO_MODE["NORMAL"] = "NORMAL";
-        AUDIO_MODE["RINGTONE"] = "RINGTONE";
-        AUDIO_MODE["BLUETOOTH"] = "BLUETOOTH";
-    })(exports.AUDIO_MODE || (exports.AUDIO_MODE = {}));
+    exports.DeviceName = void 0;
+    (function (DeviceName) {
+        DeviceName["Earpiece"] = "Earpiece";
+        DeviceName["Speakerphone"] = "Speakerphone";
+        DeviceName["WiredHeadset"] = "WiredHeadset";
+        DeviceName["BluetoothHeadset"] = "BluetoothHeadset";
+    })(exports.DeviceName || (exports.DeviceName = {}));
 
     const AudioToggle = core.registerPlugin('AudioToggle', {
         web: () => Promise.resolve().then(function () { return web; }).then(m => new m.AudioToggleWeb()),
     });
 
     class AudioToggleWeb extends core.WebPlugin {
-        async setMode() {
+        async selectDevice() {
             throw this.unimplemented('Not implemented on web.');
         }
         async start() {

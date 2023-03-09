@@ -209,7 +209,21 @@ public class AudioToggle {
      * specified preferred device list or the following default list:
      * [BluetoothHeadset], [WiredHeadset], [Earpiece], [Speakerphone].
      */
-    public void selectDevice(AudioDevice audioDevice) {
+    public void selectDevice(String deviceName) {
+        AudioDevice audioDevice;
+
+        if (deviceName.equals("Earpiece")) {
+            audioDevice = new AudioDevice.Earpiece();
+        } else if (deviceName.equals("Speakerphone")) {
+            audioDevice = new AudioDevice.Speakerphone();
+        } else if (deviceName.equals("WiredHeadset")) {
+            audioDevice = new AudioDevice.WiredHeadset();
+        } else if (deviceName.equals("BluetoothHeadset")) {
+            audioDevice = new AudioDevice.BluetoothHeadset();
+        } else {
+            audioDevice = selectedAudioDevice;
+        }
+
         if (selectedDevice != audioDevice) {
             this.logger.d(TAG, "Selected AudioDevice = " + audioDevice);
             userSelectedDevice = audioDevice;
@@ -234,7 +248,6 @@ public class AudioToggle {
             return result;
         }
     }
-
 
     private boolean hasNoDuplicates(List<Class<? extends AudioDevice>> list) {
         return list
@@ -403,40 +416,4 @@ public class AudioToggle {
         Earpiece.class,
         Speakerphone.class
     );
-
-    public void setMode(String mode) {
-        AudioManager audioManager = (AudioManager) this.context.getSystemService(Context.AUDIO_SERVICE);
-
-        // Android 12+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {} else {
-            if (mode.equals("EARPIECE")) {
-                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                audioManager.stopBluetoothSco();
-                audioManager.setBluetoothScoOn(false);
-                audioManager.setSpeakerphoneOn(false);
-                return;
-            } else if (mode.equals("SPEAKER")) {
-                audioManager.setMode(AudioManager.MODE_NORMAL);
-                audioManager.stopBluetoothSco();
-                audioManager.setBluetoothScoOn(false);
-                audioManager.setSpeakerphoneOn(true);
-                return;
-            } else if (mode.equals("RINGTONE")) {
-                audioManager.setMode(AudioManager.MODE_RINGTONE);
-                audioManager.setSpeakerphoneOn(false);
-                return;
-            } else if (mode.equals("BLUETOOTH")) {
-                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                audioManager.setBluetoothScoOn(true);
-                audioManager.startBluetoothSco();
-                return;
-            } else if (mode.equals("NORMAL")) {
-                audioManager.setMode(AudioManager.MODE_NORMAL);
-                audioManager.setSpeakerphoneOn(false);
-                return;
-            } else {
-                return;
-            }
-        }
-    }
 }

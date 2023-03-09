@@ -6,31 +6,33 @@
     "tags": [],
     "methods": [
       {
-        "name": "setMode",
-        "signature": "(data: { mode: AUDIO_MODE; }) => Promise<void>",
+        "name": "selectDevice",
+        "signature": "(data: { device: DeviceName; }) => Promise<void>",
         "parameters": [
           {
             "name": "data",
             "docs": "",
-            "type": "{ mode: AUDIO_MODE; }"
+            "type": "{ device: DeviceName; }"
           }
         ],
         "returns": "Promise<void>",
         "tags": [],
         "docs": "",
         "complexTypes": [
-          "AUDIO_MODE"
+          "DeviceName"
         ],
-        "slug": "setmode"
+        "slug": "selectdevice"
       },
       {
         "name": "start",
-        "signature": "() => Promise<{ device: any; }>",
+        "signature": "() => Promise<{ availableDevices: DeviceName[]; selectedDevice: DeviceName; }>",
         "parameters": [],
-        "returns": "Promise<{ device: any; }>",
+        "returns": "Promise<{ availableDevices: DeviceName[]; selectedDevice: DeviceName; }>",
         "tags": [],
         "docs": "",
-        "complexTypes": [],
+        "complexTypes": [
+          "DeviceName"
+        ],
         "slug": "start"
       },
       {
@@ -45,22 +47,26 @@
       },
       {
         "name": "getDevices",
-        "signature": "() => Promise<{ devices: any[]; }>",
+        "signature": "() => Promise<{ availableDevices: DeviceName[]; }>",
         "parameters": [],
-        "returns": "Promise<{ devices: any[]; }>",
+        "returns": "Promise<{ availableDevices: DeviceName[]; }>",
         "tags": [],
         "docs": "",
-        "complexTypes": [],
+        "complexTypes": [
+          "DeviceName"
+        ],
         "slug": "getdevices"
       },
       {
         "name": "getSelectedDevice",
-        "signature": "() => Promise<{ device: any; }>",
+        "signature": "() => Promise<{ selectedDevice: DeviceName; }>",
         "parameters": [],
-        "returns": "Promise<{ device: any; }>",
+        "returns": "Promise<{ selectedDevice: DeviceName; }>",
         "tags": [],
         "docs": "",
-        "complexTypes": [],
+        "complexTypes": [
+          "DeviceName"
+        ],
         "slug": "getselecteddevice"
       }
     ],
@@ -69,36 +75,30 @@
   "interfaces": [],
   "enums": [
     {
-      "name": "AUDIO_MODE",
-      "slug": "audio_mode",
+      "name": "DeviceName",
+      "slug": "devicename",
       "members": [
         {
-          "name": "EARPIECE",
-          "value": "'EARPIECE'",
+          "name": "Earpiece",
+          "value": "'Earpiece'",
           "tags": [],
           "docs": ""
         },
         {
-          "name": "SPEAKER",
-          "value": "'SPEAKER'",
+          "name": "Speakerphone",
+          "value": "'Speakerphone'",
           "tags": [],
           "docs": ""
         },
         {
-          "name": "NORMAL",
-          "value": "'NORMAL'",
+          "name": "WiredHeadset",
+          "value": "'WiredHeadset'",
           "tags": [],
           "docs": ""
         },
         {
-          "name": "RINGTONE",
-          "value": "'RINGTONE'",
-          "tags": [],
-          "docs": ""
-        },
-        {
-          "name": "BLUETOOTH",
-          "value": "'BLUETOOTH'",
+          "name": "BluetoothHeadset",
+          "value": "'BluetoothHeadset'",
           "tags": [],
           "docs": ""
         }

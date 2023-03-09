@@ -13,7 +13,7 @@ npx cap sync
 
 <docgen-index>
 
-* [`setMode(...)`](#setmode)
+* [`selectDevice(...)`](#selectdevice)
 * [`start()`](#start)
 * [`stop()`](#stop)
 * [`getDevices()`](#getdevices)
@@ -25,15 +25,15 @@ npx cap sync
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
 
-### setMode(...)
+### selectDevice(...)
 
 ```typescript
-setMode(data: { mode: AUDIO_MODE; }) => Promise<void>
+selectDevice(data: { device: DeviceName; }) => Promise<void>
 ```
 
-| Param      | Type                                                         |
-| ---------- | ------------------------------------------------------------ |
-| **`data`** | <code>{ mode: <a href="#audio_mode">AUDIO_MODE</a>; }</code> |
+| Param      | Type                                                           |
+| ---------- | -------------------------------------------------------------- |
+| **`data`** | <code>{ device: <a href="#devicename">DeviceName</a>; }</code> |
 
 --------------------
 
@@ -41,10 +41,10 @@ setMode(data: { mode: AUDIO_MODE; }) => Promise<void>
 ### start()
 
 ```typescript
-start() => Promise<{ device: any; }>
+start() => Promise<{ availableDevices: DeviceName[]; selectedDevice: DeviceName; }>
 ```
 
-**Returns:** <code>Promise&lt;{ device: any; }&gt;</code>
+**Returns:** <code>Promise&lt;{ availableDevices: DeviceName[]; selectedDevice: <a href="#devicename">DeviceName</a>; }&gt;</code>
 
 --------------------
 
@@ -61,10 +61,10 @@ stop() => Promise<void>
 ### getDevices()
 
 ```typescript
-getDevices() => Promise<{ devices: any[]; }>
+getDevices() => Promise<{ availableDevices: DeviceName[]; }>
 ```
 
-**Returns:** <code>Promise&lt;{ devices: any[]; }&gt;</code>
+**Returns:** <code>Promise&lt;{ availableDevices: DeviceName[]; }&gt;</code>
 
 --------------------
 
@@ -72,10 +72,10 @@ getDevices() => Promise<{ devices: any[]; }>
 ### getSelectedDevice()
 
 ```typescript
-getSelectedDevice() => Promise<{ device: any; }>
+getSelectedDevice() => Promise<{ selectedDevice: DeviceName; }>
 ```
 
-**Returns:** <code>Promise&lt;{ device: any; }&gt;</code>
+**Returns:** <code>Promise&lt;{ selectedDevice: <a href="#devicename">DeviceName</a>; }&gt;</code>
 
 --------------------
 
@@ -83,14 +83,13 @@ getSelectedDevice() => Promise<{ device: any; }>
 ### Enums
 
 
-#### AUDIO_MODE
+#### DeviceName
 
-| Members         | Value                    |
-| --------------- | ------------------------ |
-| **`EARPIECE`**  | <code>'EARPIECE'</code>  |
-| **`SPEAKER`**   | <code>'SPEAKER'</code>   |
-| **`NORMAL`**    | <code>'NORMAL'</code>    |
-| **`RINGTONE`**  | <code>'RINGTONE'</code>  |
-| **`BLUETOOTH`** | <code>'BLUETOOTH'</code> |
+| Members                | Value                           |
+| ---------------------- | ------------------------------- |
+| **`Earpiece`**         | <code>'Earpiece'</code>         |
+| **`Speakerphone`**     | <code>'Speakerphone'</code>     |
+| **`WiredHeadset`**     | <code>'WiredHeadset'</code>     |
+| **`BluetoothHeadset`** | <code>'BluetoothHeadset'</code> |
 
 </docgen-api>

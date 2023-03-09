@@ -1,22 +1,22 @@
-export declare enum AUDIO_MODE {
-    EARPIECE = "EARPIECE",
-    SPEAKER = "SPEAKER",
-    NORMAL = "NORMAL",
-    RINGTONE = "RINGTONE",
-    BLUETOOTH = "BLUETOOTH"
+export declare enum DeviceName {
+    Earpiece = "Earpiece",
+    Speakerphone = "Speakerphone",
+    WiredHeadset = "WiredHeadset",
+    BluetoothHeadset = "BluetoothHeadset"
 }
 export interface AudioTogglePlugin {
-    setMode(data: {
-        mode: AUDIO_MODE;
+    selectDevice(data: {
+        device: DeviceName;
     }): Promise<void>;
     start(): Promise<{
-        device: any;
+        availableDevices: DeviceName[];
+        selectedDevice: DeviceName;
     }>;
     stop(): Promise<void>;
     getDevices(): Promise<{
-        devices: any[];
+        availableDevices: DeviceName[];
     }>;
     getSelectedDevice(): Promise<{
-        device: any;
+        selectedDevice: DeviceName;
     }>;
 }

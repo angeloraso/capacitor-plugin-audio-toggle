@@ -1,15 +1,16 @@
 import { WebPlugin } from '@capacitor/core';
-import type { AudioTogglePlugin } from './definitions';
+import type { AudioTogglePlugin, DeviceName } from './definitions';
 export declare class AudioToggleWeb extends WebPlugin implements AudioTogglePlugin {
-    setMode(): Promise<void>;
+    selectDevice(): Promise<void>;
     start(): Promise<{
-        device: any;
+        availableDevices: DeviceName[];
+        selectedDevice: DeviceName;
     }>;
     stop(): Promise<void>;
     getDevices(): Promise<{
-        devices: any[];
+        availableDevices: DeviceName[];
     }>;
     getSelectedDevice(): Promise<{
-        device: any;
+        selectedDevice: DeviceName;
     }>;
 }

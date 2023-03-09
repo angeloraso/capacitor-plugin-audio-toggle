@@ -1,13 +1,13 @@
 import { WebPlugin } from '@capacitor/core';
 
-import type { AudioTogglePlugin } from './definitions';
+import type { AudioTogglePlugin, DeviceName } from './definitions';
 
 export class AudioToggleWeb extends WebPlugin implements AudioTogglePlugin {
-  async setMode(): Promise<void>{
+  async selectDevice(): Promise<void> {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  async start(): Promise<{device: any}>{
+  async start(): Promise<{availableDevices: DeviceName[], selectedDevice: DeviceName}>{
     throw this.unimplemented('Not implemented on web.');
   }
 
@@ -15,11 +15,11 @@ export class AudioToggleWeb extends WebPlugin implements AudioTogglePlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  async getDevices(): Promise<{devices: any[]}>{
+  async getDevices(): Promise<{availableDevices: DeviceName[]}>{
     throw this.unimplemented('Not implemented on web.');
   }
   
-  async getSelectedDevice(): Promise<{device: any}>{
+  async getSelectedDevice(): Promise<{selectedDevice: DeviceName}>{
     throw this.unimplemented('Not implemented on web.');
   }
 }
