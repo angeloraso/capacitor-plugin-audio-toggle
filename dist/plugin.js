@@ -17,10 +17,10 @@ var capacitorAudioToggle = (function (exports, core) {
         async selectDevice() {
             throw this.unimplemented('Not implemented on web.');
         }
-        async start() {
+        async enable() {
             throw this.unimplemented('Not implemented on web.');
         }
-        async stop() {
+        async disable() {
             throw this.unimplemented('Not implemented on web.');
         }
         async activate() {
@@ -29,7 +29,7 @@ var capacitorAudioToggle = (function (exports, core) {
         async deactivate() {
             throw this.unimplemented('Not implemented on web.');
         }
-        async getDevices() {
+        async getAvailableDevices() {
             throw this.unimplemented('Not implemented on web.');
         }
         async getSelectedDevice() {

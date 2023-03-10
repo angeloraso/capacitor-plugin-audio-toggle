@@ -6,6 +6,26 @@
     "tags": [],
     "methods": [
       {
+        "name": "enable",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "enable"
+      },
+      {
+        "name": "disable",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "disable"
+      },
+      {
         "name": "selectDevice",
         "signature": "(data: { device: DeviceName; }) => Promise<void>",
         "parameters": [
@@ -22,28 +42,6 @@
           "DeviceName"
         ],
         "slug": "selectdevice"
-      },
-      {
-        "name": "start",
-        "signature": "() => Promise<{ availableDevices: DeviceName[]; selectedDevice: DeviceName; }>",
-        "parameters": [],
-        "returns": "Promise<{ availableDevices: DeviceName[]; selectedDevice: DeviceName; }>",
-        "tags": [],
-        "docs": "",
-        "complexTypes": [
-          "DeviceName"
-        ],
-        "slug": "start"
-      },
-      {
-        "name": "stop",
-        "signature": "() => Promise<void>",
-        "parameters": [],
-        "returns": "Promise<void>",
-        "tags": [],
-        "docs": "",
-        "complexTypes": [],
-        "slug": "stop"
       },
       {
         "name": "activate",
@@ -66,33 +64,74 @@
         "slug": "deactivate"
       },
       {
-        "name": "getDevices",
-        "signature": "() => Promise<{ availableDevices: DeviceName[]; }>",
+        "name": "getAvailableDevices",
+        "signature": "() => Promise<{ available: DeviceName[]; }>",
         "parameters": [],
-        "returns": "Promise<{ availableDevices: DeviceName[]; }>",
+        "returns": "Promise<{ available: DeviceName[]; }>",
         "tags": [],
         "docs": "",
         "complexTypes": [
           "DeviceName"
         ],
-        "slug": "getdevices"
+        "slug": "getavailabledevices"
       },
       {
         "name": "getSelectedDevice",
-        "signature": "() => Promise<{ selectedDevice: DeviceName; }>",
+        "signature": "() => Promise<{ selected: DeviceName; }>",
         "parameters": [],
-        "returns": "Promise<{ selectedDevice: DeviceName; }>",
+        "returns": "Promise<{ selected: DeviceName; }>",
         "tags": [],
         "docs": "",
         "complexTypes": [
           "DeviceName"
         ],
         "slug": "getselecteddevice"
+      },
+      {
+        "name": "addListener",
+        "signature": "(eventName: 'onChanges', listenerFunc: () => { available: DeviceName[]; selected: DeviceName; }) => Promise<PluginListenerHandle> & PluginListenerHandle",
+        "parameters": [
+          {
+            "name": "eventName",
+            "docs": "",
+            "type": "'onChanges'"
+          },
+          {
+            "name": "listenerFunc",
+            "docs": "",
+            "type": "() => { available: DeviceName[]; selected: DeviceName; }"
+          }
+        ],
+        "returns": "Promise<PluginListenerHandle> & PluginListenerHandle",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [
+          "PluginListenerHandle",
+          "DeviceName"
+        ],
+        "slug": "addlisteneronchanges"
       }
     ],
     "properties": []
   },
-  "interfaces": [],
+  "interfaces": [
+    {
+      "name": "PluginListenerHandle",
+      "slug": "pluginlistenerhandle",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "remove",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "() => Promise<void>"
+        }
+      ]
+    }
+  ],
   "enums": [
     {
       "name": "DeviceName",

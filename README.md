@@ -13,19 +13,39 @@ npx cap sync
 
 <docgen-index>
 
+* [`enable()`](#enable)
+* [`disable()`](#disable)
 * [`selectDevice(...)`](#selectdevice)
-* [`start()`](#start)
-* [`stop()`](#stop)
 * [`activate()`](#activate)
 * [`deactivate()`](#deactivate)
-* [`getDevices()`](#getdevices)
+* [`getAvailableDevices()`](#getavailabledevices)
 * [`getSelectedDevice()`](#getselecteddevice)
+* [`addListener('onChanges', ...)`](#addlisteneronchanges)
+* [Interfaces](#interfaces)
 * [Enums](#enums)
 
 </docgen-index>
 
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
+
+### enable()
+
+```typescript
+enable() => Promise<void>
+```
+
+--------------------
+
+
+### disable()
+
+```typescript
+disable() => Promise<void>
+```
+
+--------------------
+
 
 ### selectDevice(...)
 
@@ -36,26 +56,6 @@ selectDevice(data: { device: DeviceName; }) => Promise<void>
 | Param      | Type                                                           |
 | ---------- | -------------------------------------------------------------- |
 | **`data`** | <code>{ device: <a href="#devicename">DeviceName</a>; }</code> |
-
---------------------
-
-
-### start()
-
-```typescript
-start() => Promise<{ availableDevices: DeviceName[]; selectedDevice: DeviceName; }>
-```
-
-**Returns:** <code>Promise&lt;{ availableDevices: DeviceName[]; selectedDevice: <a href="#devicename">DeviceName</a>; }&gt;</code>
-
---------------------
-
-
-### stop()
-
-```typescript
-stop() => Promise<void>
-```
 
 --------------------
 
@@ -78,13 +78,13 @@ deactivate() => Promise<void>
 --------------------
 
 
-### getDevices()
+### getAvailableDevices()
 
 ```typescript
-getDevices() => Promise<{ availableDevices: DeviceName[]; }>
+getAvailableDevices() => Promise<{ available: DeviceName[]; }>
 ```
 
-**Returns:** <code>Promise&lt;{ availableDevices: DeviceName[]; }&gt;</code>
+**Returns:** <code>Promise&lt;{ available: DeviceName[]; }&gt;</code>
 
 --------------------
 
@@ -92,12 +92,38 @@ getDevices() => Promise<{ availableDevices: DeviceName[]; }>
 ### getSelectedDevice()
 
 ```typescript
-getSelectedDevice() => Promise<{ selectedDevice: DeviceName; }>
+getSelectedDevice() => Promise<{ selected: DeviceName; }>
 ```
 
-**Returns:** <code>Promise&lt;{ selectedDevice: <a href="#devicename">DeviceName</a>; }&gt;</code>
+**Returns:** <code>Promise&lt;{ selected: <a href="#devicename">DeviceName</a>; }&gt;</code>
 
 --------------------
+
+
+### addListener('onChanges', ...)
+
+```typescript
+addListener(eventName: 'onChanges', listenerFunc: () => { available: DeviceName[]; selected: DeviceName; }) => Promise<PluginListenerHandle> & PluginListenerHandle
+```
+
+| Param              | Type                                                                                               |
+| ------------------ | -------------------------------------------------------------------------------------------------- |
+| **`eventName`**    | <code>'onChanges'</code>                                                                           |
+| **`listenerFunc`** | <code>() =&gt; { available: DeviceName[]; selected: <a href="#devicename">DeviceName</a>; }</code> |
+
+**Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+
+--------------------
+
+
+### Interfaces
+
+
+#### PluginListenerHandle
+
+| Prop         | Type                                      |
+| ------------ | ----------------------------------------- |
+| **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
 
 
 ### Enums

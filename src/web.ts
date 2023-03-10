@@ -7,11 +7,11 @@ export class AudioToggleWeb extends WebPlugin implements AudioTogglePlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  async start(): Promise<{availableDevices: DeviceName[], selectedDevice: DeviceName}>{
+  async enable(): Promise<void>{
     throw this.unimplemented('Not implemented on web.');
   }
 
-  async stop(): Promise<void>{
+  async disable(): Promise<void>{
     throw this.unimplemented('Not implemented on web.');
   }
 
@@ -23,12 +23,11 @@ export class AudioToggleWeb extends WebPlugin implements AudioTogglePlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
-
-  async getDevices(): Promise<{availableDevices: DeviceName[]}>{
+  async getAvailableDevices(): Promise<{available: DeviceName[]}>{
     throw this.unimplemented('Not implemented on web.');
   }
   
-  async getSelectedDevice(): Promise<{selectedDevice: DeviceName}>{
+  async getSelectedDevice(): Promise<{selected: DeviceName}>{
     throw this.unimplemented('Not implemented on web.');
   }
 }

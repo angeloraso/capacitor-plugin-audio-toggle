@@ -20,10 +20,10 @@ class AudioToggleWeb extends core.WebPlugin {
     async selectDevice() {
         throw this.unimplemented('Not implemented on web.');
     }
-    async start() {
+    async enable() {
         throw this.unimplemented('Not implemented on web.');
     }
-    async stop() {
+    async disable() {
         throw this.unimplemented('Not implemented on web.');
     }
     async activate() {
@@ -32,7 +32,7 @@ class AudioToggleWeb extends core.WebPlugin {
     async deactivate() {
         throw this.unimplemented('Not implemented on web.');
     }
-    async getDevices() {
+    async getAvailableDevices() {
         throw this.unimplemented('Not implemented on web.');
     }
     async getSelectedDevice() {

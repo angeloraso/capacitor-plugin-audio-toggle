@@ -20,25 +20,28 @@ public class AudioTogglePlugin extends Plugin {
     }
 
     @PluginMethod
-    public void start(PluginCall call) {
+    public void enable(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject("Audio toggle plugin error: App is finishing");
             return;
         }
 
-        audioToggle.start(
-            (audioDevices, audioDevice) -> {
-                JSObject res = new JSObject();
-                List<String> availableDevices = audioDevices.stream().map(device -> device.getName()).collect(Collectors.toList());
-                res.put("availableDevices", availableDevices);
-                res.put("selectedDevice", audioDevice.getName());
-                call.resolve(res);
-            }
-        );
+        audioToggle.setAudioToggleEventListener(this::onAudioToggleEvent);
+        audioToggle.start();
+    }
+
+    private void onAudioToggleEvent(List<AudioDevice> audioDevices, AudioDevice audioDevice) {
+        JSObject res = new JSObject();
+        List<String> availableDevices = audioDevices.stream().map(device -> device.getName()).collect(Collectors.toList());
+        res.put("available", availableDevices);
+        res.put("selected", audioDevice.getName());
+
+        bridge.triggerWindowJSEvent("onChanges");
+        notifyListeners("onChanges", res);
     }
 
     @PluginMethod
-    public void stop(PluginCall call) {
+    public void disable(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject("Audio toggle plugin error: App is finishing");
             return;
@@ -82,7 +85,7 @@ public class AudioTogglePlugin extends Plugin {
             .stream()
             .map(device -> device.getName())
             .collect(Collectors.toList());
-        res.put("availableDevices", availableDevices);
+        res.put("available", availableDevices);
         call.resolve(res);
     }
 
@@ -95,7 +98,7 @@ public class AudioTogglePlugin extends Plugin {
 
         JSObject res = new JSObject();
         AudioDevice device = audioToggle.selectedAudioDevice;
-        res.put("selectedDevice", device.getName());
+        res.put("selected", device.getName());
         call.resolve(res);
     }
 

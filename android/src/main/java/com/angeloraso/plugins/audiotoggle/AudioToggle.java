@@ -89,15 +89,8 @@ public class AudioToggle {
         this.context = context;
         this.logger = new ProductionLogger(log);
 
-        OnAudioFocusChangeListener listener = new OnAudioFocusChangeListener() {
-            @Override
-            public void onAudioFocusChange(int focusChange) {
-                // Handle audio focus changes here
-            }
-        };
-
         this.audioDeviceManager =
-            new AudioDeviceManager(context, this.logger, (AudioManager) context.getSystemService(Context.AUDIO_SERVICE), listener);
+            new AudioDeviceManager(context, this.logger, (AudioManager) context.getSystemService(Context.AUDIO_SERVICE), focusChange -> {});
         this.wiredHeadsetReceiver = new WiredHeadsetReceiver(context, this.logger);
         this.bluetoothHeadsetManager =
             BluetoothHeadsetManager.newInstance(context, logger, BluetoothAdapter.getDefaultAdapter(), audioDeviceManager);
@@ -108,15 +101,7 @@ public class AudioToggle {
             );
     }
 
-    /**
-     * Starts listening for audio device changes and calls the provided listener upon each change.
-     * Note that when audio device listening is no longer needed, AudioToggle.stop() should be called
-     * in order to prevent a memory leak.
-     *
-     * @param listener the listener to call upon each audio device change
-     */
-    public void start(AudioDeviceChangeListener listener) {
-        audioDeviceChangeListener = listener;
+    public void start() {
         switch (state) {
             case STOPPED:
                 enumerateDevices(null);
@@ -129,6 +114,17 @@ public class AudioToggle {
             default:
                 logger.d(TAG, "Redundant start() invocation while already in the started or activated state");
         }
+    }
+
+    /**
+     * Starts listening for audio device changes and calls the provided listener upon each change.
+     * Note that when audio device listening is no longer needed, AudioToggle.stop() should be called
+     * in order to prevent a memory leak.
+     *
+     * @param listener the listener to call upon each audio device change
+     */
+    public void setAudioToggleEventListener(AudioDeviceChangeListener listener) {
+        audioDeviceChangeListener = listener;
     }
 
     /**
@@ -210,16 +206,15 @@ public class AudioToggle {
     public void selectDevice(String deviceName) {
         AudioDevice audioDevice;
 
-        if (deviceName.equals("Earpiece")) {
-            audioDevice = new AudioDevice.Earpiece();
-        } else if (deviceName.equals("Speakerphone")) {
-            audioDevice = new AudioDevice.Speakerphone();
-        } else if (deviceName.equals("WiredHeadset")) {
-            audioDevice = new AudioDevice.WiredHeadset();
-        } else if (deviceName.equals("BluetoothHeadset")) {
-            audioDevice = new AudioDevice.BluetoothHeadset();
+        List<AudioDevice> devices = mutableAudioDevices
+            .stream()
+            .filter(device -> device.getName().equals(deviceName))
+            .collect(Collectors.toList());
+
+        if (devices.size() != 0) {
+            audioDevice = devices.get(0);
         } else {
-            audioDevice = selectedAudioDevice;
+            audioDevice = selectedDevice;
         }
 
         if (selectedDevice != audioDevice) {
@@ -390,7 +385,11 @@ public class AudioToggle {
                         newHeadset.ifPresent(newHeadsetDevice -> userSelectedDevice = newHeadsetDevice);
                         return newHeadset.isPresent();
                     } else {
-                        return audioDevices.contains(selectedDevice);
+                        List<AudioDevice> devices = audioDevices
+                            .stream()
+                            .filter(device -> device.getName().equals(selectedDevice.getName()))
+                            .collect(Collectors.toList());
+                        return devices.size() != 0;
                     }
                 }
             )
