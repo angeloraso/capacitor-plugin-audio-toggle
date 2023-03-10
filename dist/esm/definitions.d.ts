@@ -19,8 +19,8 @@ export interface AudioTogglePlugin {
     getSelectedDevice(): Promise<{
         selected: DeviceName;
     }>;
-    addListener(eventName: 'onChanges', listenerFunc: () => {
+    addListener(eventName: 'onChanges', listenerFunc: (data: {
         available: DeviceName[];
         selected: DeviceName;
-    }): Promise<PluginListenerHandle> & PluginListenerHandle;
+    }) => void): Promise<PluginListenerHandle> & PluginListenerHandle;
 }

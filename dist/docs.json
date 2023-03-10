@@ -89,7 +89,7 @@
       },
       {
         "name": "addListener",
-        "signature": "(eventName: 'onChanges', listenerFunc: () => { available: DeviceName[]; selected: DeviceName; }) => Promise<PluginListenerHandle> & PluginListenerHandle",
+        "signature": "(eventName: 'onChanges', listenerFunc: (data: { available: DeviceName[]; selected: DeviceName; }) => void) => Promise<PluginListenerHandle> & PluginListenerHandle",
         "parameters": [
           {
             "name": "eventName",
@@ -99,7 +99,7 @@
           {
             "name": "listenerFunc",
             "docs": "",
-            "type": "() => { available: DeviceName[]; selected: DeviceName; }"
+            "type": "(data: { available: DeviceName[]; selected: DeviceName; }) => void"
           }
         ],
         "returns": "Promise<PluginListenerHandle> & PluginListenerHandle",

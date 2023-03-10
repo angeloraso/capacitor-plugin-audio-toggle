@@ -103,13 +103,13 @@ getSelectedDevice() => Promise<{ selected: DeviceName; }>
 ### addListener('onChanges', ...)
 
 ```typescript
-addListener(eventName: 'onChanges', listenerFunc: () => { available: DeviceName[]; selected: DeviceName; }) => Promise<PluginListenerHandle> & PluginListenerHandle
+addListener(eventName: 'onChanges', listenerFunc: (data: { available: DeviceName[]; selected: DeviceName; }) => void) => Promise<PluginListenerHandle> & PluginListenerHandle
 ```
 
-| Param              | Type                                                                                               |
-| ------------------ | -------------------------------------------------------------------------------------------------- |
-| **`eventName`**    | <code>'onChanges'</code>                                                                           |
-| **`listenerFunc`** | <code>() =&gt; { available: DeviceName[]; selected: <a href="#devicename">DeviceName</a>; }</code> |
+| Param              | Type                                                                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| **`eventName`**    | <code>'onChanges'</code>                                                                                     |
+| **`listenerFunc`** | <code>(data: { available: DeviceName[]; selected: <a href="#devicename">DeviceName</a>; }) =&gt; void</code> |
 
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
 
