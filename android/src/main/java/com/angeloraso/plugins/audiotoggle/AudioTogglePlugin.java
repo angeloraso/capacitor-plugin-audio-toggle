@@ -32,10 +32,10 @@ public class AudioTogglePlugin extends Plugin {
 
     private void onAudioToggleEvent(List<AudioDevice> audioDevices, AudioDevice audioDevice) {
         JSObject res = new JSObject();
-        res.put(getContext().getString('earpiece'), false);
-        res.put(getContext().getString('speakerphone'), false);
-        res.put(getContext().getString('wired'), false);
-        res.put(getContext().getString('bluetooth'), false);
+        res.put('earpiece', false);
+        res.put('speakerphone', false);
+        res.put('wired', false);
+        res.put('bluetooth', false);
 
         for (AudioDevice device : audioDevices) {
             res.put(device.getName(), true);
@@ -89,10 +89,10 @@ public class AudioTogglePlugin extends Plugin {
 
         JSObject res = new JSObject();
 
-        res.put(getContext().getString('earpiece'), false);
-        res.put(getContext().getString('speakerphone'), false);
-        res.put(getContext().getString('wired'), false);
-        res.put(getContext().getString('bluetooth'), false);
+        res.put('earpiece', false);
+        res.put('speakerphone', false);
+        res.put('wired', false);
+        res.put('bluetooth', false);
 
         for (AudioDevice device : audioToggle.availableAudioDevices) {
             res.put(device.getName(), true);
