@@ -14,7 +14,7 @@ public abstract class AudioDevice {
         private final String name;
 
         public BluetoothHeadset() {
-            this.name = "Bluetooth";
+            this.name = "bluetooth";
         }
 
         public BluetoothHeadset(String name) {
@@ -33,7 +33,7 @@ public abstract class AudioDevice {
         private final String name;
 
         public WiredHeadset() {
-            this.name = "Wired Headset";
+            this.name = "wired";
         }
 
         @Override
@@ -48,7 +48,7 @@ public abstract class AudioDevice {
         private final String name;
 
         public Earpiece() {
-            this.name = "Earpiece";
+            this.name = "earpiece";
         }
 
         @Override
@@ -63,7 +63,7 @@ public abstract class AudioDevice {
         private final String name;
 
         public Speakerphone() {
-            this.name = "Speakerphone";
+            this.name = "speakerphone";
         }
 
         @Override

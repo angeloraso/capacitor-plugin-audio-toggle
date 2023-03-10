@@ -1,10 +1,5 @@
 import type { PluginListenerHandle } from "@capacitor/core";
-export declare enum DeviceName {
-    Earpiece = "Earpiece",
-    Speakerphone = "Speakerphone",
-    WiredHeadset = "WiredHeadset",
-    BluetoothHeadset = "BluetoothHeadset"
-}
+export declare type DeviceName = 'earpiece' | 'speakerphone' | 'wired' | 'bluetooth';
 export interface AudioTogglePlugin {
     enable(): Promise<void>;
     disable(): Promise<void>;
@@ -14,13 +9,19 @@ export interface AudioTogglePlugin {
     activate(): Promise<void>;
     deactivate(): Promise<void>;
     getAvailableDevices(): Promise<{
-        available: DeviceName[];
+        earpiece: boolean;
+        speakerphone: boolean;
+        wired: boolean;
+        bluetooth: boolean;
     }>;
     getSelectedDevice(): Promise<{
-        selected: DeviceName;
+        selectedDevice: DeviceName;
     }>;
     addListener(eventName: 'onChanges', listenerFunc: (data: {
-        available: DeviceName[];
-        selected: DeviceName;
+        earpiece: boolean;
+        speakerphone: boolean;
+        wired: boolean;
+        bluetooth: boolean;
+        selectedDevice: DeviceName;
     }) => void): Promise<PluginListenerHandle> & PluginListenerHandle;
 }

@@ -65,21 +65,19 @@
       },
       {
         "name": "getAvailableDevices",
-        "signature": "() => Promise<{ available: DeviceName[]; }>",
+        "signature": "() => Promise<{ earpiece: boolean; speakerphone: boolean; wired: boolean; bluetooth: boolean; }>",
         "parameters": [],
-        "returns": "Promise<{ available: DeviceName[]; }>",
+        "returns": "Promise<{ earpiece: boolean; speakerphone: boolean; wired: boolean; bluetooth: boolean; }>",
         "tags": [],
         "docs": "",
-        "complexTypes": [
-          "DeviceName"
-        ],
+        "complexTypes": [],
         "slug": "getavailabledevices"
       },
       {
         "name": "getSelectedDevice",
-        "signature": "() => Promise<{ selected: DeviceName; }>",
+        "signature": "() => Promise<{ selectedDevice: DeviceName; }>",
         "parameters": [],
-        "returns": "Promise<{ selected: DeviceName; }>",
+        "returns": "Promise<{ selectedDevice: DeviceName; }>",
         "tags": [],
         "docs": "",
         "complexTypes": [
@@ -89,7 +87,7 @@
       },
       {
         "name": "addListener",
-        "signature": "(eventName: 'onChanges', listenerFunc: (data: { available: DeviceName[]; selected: DeviceName; }) => void) => Promise<PluginListenerHandle> & PluginListenerHandle",
+        "signature": "(eventName: 'onChanges', listenerFunc: (data: { earpiece: boolean; speakerphone: boolean; wired: boolean; bluetooth: boolean; selectedDevice: DeviceName; }) => void) => Promise<PluginListenerHandle> & PluginListenerHandle",
         "parameters": [
           {
             "name": "eventName",
@@ -99,7 +97,7 @@
           {
             "name": "listenerFunc",
             "docs": "",
-            "type": "(data: { available: DeviceName[]; selected: DeviceName; }) => void"
+            "type": "(data: { earpiece: boolean; speakerphone: boolean; wired: boolean; bluetooth: boolean; selectedDevice: DeviceName; }) => void"
           }
         ],
         "returns": "Promise<PluginListenerHandle> & PluginListenerHandle",
@@ -132,38 +130,31 @@
       ]
     }
   ],
-  "enums": [
+  "enums": [],
+  "typeAliases": [
     {
       "name": "DeviceName",
       "slug": "devicename",
-      "members": [
+      "docs": "",
+      "types": [
         {
-          "name": "Earpiece",
-          "value": "'Earpiece'",
-          "tags": [],
-          "docs": ""
+          "text": "'earpiece'",
+          "complexTypes": []
         },
         {
-          "name": "Speakerphone",
-          "value": "'Speakerphone'",
-          "tags": [],
-          "docs": ""
+          "text": "'speakerphone'",
+          "complexTypes": []
         },
         {
-          "name": "WiredHeadset",
-          "value": "'WiredHeadset'",
-          "tags": [],
-          "docs": ""
+          "text": "'wired'",
+          "complexTypes": []
         },
         {
-          "name": "BluetoothHeadset",
-          "value": "'BluetoothHeadset'",
-          "tags": [],
-          "docs": ""
+          "text": "'bluetooth'",
+          "complexTypes": []
         }
       ]
     }
   ],
-  "typeAliases": [],
   "pluginConfigs": []
 }

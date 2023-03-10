@@ -32,9 +32,16 @@ public class AudioTogglePlugin extends Plugin {
 
     private void onAudioToggleEvent(List<AudioDevice> audioDevices, AudioDevice audioDevice) {
         JSObject res = new JSObject();
-        List<String> availableDevices = audioDevices.stream().map(device -> device.getName()).collect(Collectors.toList());
-        res.put("available", availableDevices);
-        res.put("selected", audioDevice.getName());
+        res.put(getContext().getString('earpiece'), false);
+        res.put(getContext().getString('speakerphone'), false);
+        res.put(getContext().getString('wired'), false);
+        res.put(getContext().getString('bluetooth'), false);
+
+        for (AudioDevice device : audioDevices) {
+            res.put(device.getName(), true);
+        }
+
+        res.put("selectedDevice", audioDevice.getName());
 
         bridge.triggerWindowJSEvent("onChanges");
         notifyListeners("onChanges", res);
@@ -81,11 +88,16 @@ public class AudioTogglePlugin extends Plugin {
         }
 
         JSObject res = new JSObject();
-        List<String> availableDevices = audioToggle.availableAudioDevices
-            .stream()
-            .map(device -> device.getName())
-            .collect(Collectors.toList());
-        res.put("available", availableDevices);
+
+        res.put(getContext().getString('earpiece'), false);
+        res.put(getContext().getString('speakerphone'), false);
+        res.put(getContext().getString('wired'), false);
+        res.put(getContext().getString('bluetooth'), false);
+
+        for (AudioDevice device : audioToggle.availableAudioDevices) {
+            res.put(device.getName(), true);
+        }
+
         call.resolve(res);
     }
 
@@ -98,7 +110,7 @@ public class AudioTogglePlugin extends Plugin {
 
         JSObject res = new JSObject();
         AudioDevice device = audioToggle.selectedAudioDevice;
-        res.put("selected", device.getName());
+        res.put("selectedDevice", device.getName());
         call.resolve(res);
     }
 

@@ -201,7 +201,7 @@ public class AudioToggle {
      * Selects the desired [audioDevice]. If the provided [AudioDevice] is not
      * available, no changes are made. If the provided device is null, one is chosen based on the
      * specified preferred device list or the following default list:
-     * [BluetoothHeadset], [WiredHeadset], [Earpiece], [Speakerphone].
+     * [bluetooth], [wired], [earpiece], [speakerphone].
      */
     public void selectDevice(String deviceName) {
         AudioDevice audioDevice;

@@ -4,14 +4,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 var core = require('@capacitor/core');
 
-exports.DeviceName = void 0;
-(function (DeviceName) {
-    DeviceName["Earpiece"] = "Earpiece";
-    DeviceName["Speakerphone"] = "Speakerphone";
-    DeviceName["WiredHeadset"] = "WiredHeadset";
-    DeviceName["BluetoothHeadset"] = "BluetoothHeadset";
-})(exports.DeviceName || (exports.DeviceName = {}));
-
 const AudioToggle = core.registerPlugin('AudioToggle', {
     web: () => Promise.resolve().then(function () { return web; }).then(m => new m.AudioToggleWeb()),
 });

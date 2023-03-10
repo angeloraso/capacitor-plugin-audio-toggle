@@ -1,9 +1,2 @@
-export var DeviceName;
-(function (DeviceName) {
-    DeviceName["Earpiece"] = "Earpiece";
-    DeviceName["Speakerphone"] = "Speakerphone";
-    DeviceName["WiredHeadset"] = "WiredHeadset";
-    DeviceName["BluetoothHeadset"] = "BluetoothHeadset";
-})(DeviceName || (DeviceName = {}));
-;
+export {};
 //# sourceMappingURL=definitions.js.map
