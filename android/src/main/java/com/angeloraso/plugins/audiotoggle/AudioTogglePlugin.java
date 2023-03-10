@@ -74,7 +74,7 @@ public class AudioTogglePlugin extends Plugin {
     }
 
     @PluginMethod
-    public void getDevices(PluginCall call) {
+    public void getAvailableDevices(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject("Audio toggle plugin error: App is finishing");
             return;
