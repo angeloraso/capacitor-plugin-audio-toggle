@@ -3,8 +3,6 @@ package com.angeloraso.plugins.audiotoggle;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.media.AudioManager;
-import android.media.AudioManager.OnAudioFocusChangeListener;
-import android.os.Build;
 import com.angeloraso.plugins.audiotoggle.AudioDevice.BluetoothHeadset;
 import com.angeloraso.plugins.audiotoggle.AudioDevice.Earpiece;
 import com.angeloraso.plugins.audiotoggle.AudioDevice.Speakerphone;
@@ -206,13 +204,10 @@ public class AudioToggle {
     public void selectDevice(String deviceName) {
         AudioDevice audioDevice;
 
-        List<AudioDevice> devices = mutableAudioDevices
-            .stream()
-            .filter(device -> device.getName().equals(deviceName))
-            .collect(Collectors.toList());
+        Optional<AudioDevice> result = mutableAudioDevices.stream().filter(_device -> _device.getName().equals(deviceName)).findFirst();
 
-        if (devices.size() != 0) {
-            audioDevice = devices.get(0);
+        if (result.isPresent()) {
+            audioDevice = result.get();
         } else {
             audioDevice = selectedDevice;
         }
