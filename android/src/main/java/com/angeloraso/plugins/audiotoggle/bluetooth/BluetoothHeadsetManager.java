@@ -235,12 +235,10 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
     @Override
     public void onServiceConnected(int profile, BluetoothProfile bluetoothProfile) {
         headsetProxy = (BluetoothHeadset) bluetoothProfile;
-        for (BluetoothDevice device : bluetoothProfile.getConnectedDevices()) {
-            if (!this.permissionsRequestStrategy.hasPermissions()) {
-                return;
+        if (hasPermissions()) {
+            for (BluetoothDevice device : bluetoothProfile.getConnectedDevices()) {
+                logger.d(TAG, "Bluetooth " + device.getName() + " connected");
             }
-
-            logger.d(TAG, "Bluetooth " + device.getName() + " connected");
         }
         if (hasConnectedDevice()) {
             connect();
@@ -265,7 +263,7 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
             BluetoothDeviceWrapper bluetoothDevice = getHeadsetDevice(intent);
             if (bluetoothDevice != null) {
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, STATE_DISCONNECTED);
-                if (!this.permissionsRequestStrategy.hasPermissions()) {
+                if (!hasPermissions()) {
                     return;
                 }
 
@@ -411,7 +409,7 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
     @SuppressLint("MissingPermission")
     private String getHeadsetName() {
         if (headsetProxy != null) {
-            if (!this.permissionsRequestStrategy.hasPermissions()) {
+            if (!hasPermissions()) {
                 return null;
             }
 
@@ -439,7 +437,7 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
     @SuppressLint("MissingPermission")
     private boolean hasActiveHeadset() {
         if (headsetProxy != null) {
-            if (!this.permissionsRequestStrategy.hasPermissions()) {
+            if (!hasPermissions()) {
                 return false;
             }
 
@@ -458,7 +456,7 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
     @SuppressLint("MissingPermission")
     private boolean hasConnectedDevice() {
         if (headsetProxy != null) {
-            if (!this.permissionsRequestStrategy.hasPermissions()) {
+            if (!hasPermissions()) {
                 return false;
             }
 
@@ -472,7 +470,7 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
 
     private BluetoothDeviceWrapper getHeadsetDevice(Intent intent) {
         BluetoothDeviceWrapper deviceWrapper = null;
-        if (permissionsRequestStrategy.hasPermissions()) {
+        if (hasPermissions()) {
             deviceWrapper = bluetoothIntentProcessor.getBluetoothDevice(intent);
         }
 
@@ -525,6 +523,8 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
 
     private class EnableBluetoothScoJob extends BluetoothScoJob {
 
+        AudioDeviceManager audioDeviceManager;
+
         public EnableBluetoothScoJob(
             final Logger logger,
             final AudioDeviceManager audioDeviceManager,
@@ -532,12 +532,13 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
             final SystemClockWrapper systemClockWrapper
         ) {
             super(logger, bluetoothScoHandler, systemClockWrapper);
+            this.audioDeviceManager = audioDeviceManager;
         }
 
         @Override
         protected void scoAction() {
             logger.d(TAG, "Attempting to enable bluetooth SCO");
-            audioDeviceManager.enableBluetoothSco(true);
+            this.audioDeviceManager.enableBluetoothSco(true);
             headsetState = HeadsetState.AudioActivating;
         }
 
@@ -552,6 +553,8 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
 
     private class DisableBluetoothScoJob extends BluetoothScoJob {
 
+        AudioDeviceManager audioDeviceManager;
+
         public DisableBluetoothScoJob(
             final Logger logger,
             final AudioDeviceManager audioDeviceManager,
@@ -559,12 +562,13 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
             final SystemClockWrapper systemClockWrapper
         ) {
             super(logger, bluetoothScoHandler, systemClockWrapper);
+            this.audioDeviceManager = audioDeviceManager;
         }
 
         @Override
         protected void scoAction() {
             logger.d(TAG, "Attempting to disable bluetooth SCO");
-            audioDeviceManager.enableBluetoothSco(false);
+            this.audioDeviceManager.enableBluetoothSco(false);
             headsetState = HeadsetState.Connected;
         }
 
