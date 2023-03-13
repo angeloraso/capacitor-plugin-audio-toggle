@@ -7,7 +7,7 @@ import static android.bluetooth.BluetoothHeadset.STATE_AUDIO_DISCONNECTED;
 import static android.bluetooth.BluetoothProfile.STATE_CONNECTED;
 import static android.bluetooth.BluetoothProfile.STATE_DISCONNECTED;
 
-import android.Manifest;
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -17,16 +17,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import androidx.core.app.ActivityCompat;
 import com.angeloraso.plugins.audiotoggle.AudioDevice;
 import com.angeloraso.plugins.audiotoggle.AudioDeviceManager;
 import com.angeloraso.plugins.audiotoggle.android.BluetoothDeviceWrapper;
 import com.angeloraso.plugins.audiotoggle.android.BluetoothIntentProcessor;
 import com.angeloraso.plugins.audiotoggle.android.BluetoothIntentProcessorImpl;
+import com.angeloraso.plugins.audiotoggle.android.BluetoothPermissionCheckStrategy;
 import com.angeloraso.plugins.audiotoggle.android.Logger;
 import com.angeloraso.plugins.audiotoggle.android.PermissionsCheckStrategy;
 import com.angeloraso.plugins.audiotoggle.android.SystemClockWrapper;
@@ -147,7 +145,7 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
             systemClockWrapper,
             bluetoothIntentProcessor,
             headsetProxy,
-            new DefaultPermissionsCheckStrategy(context)
+            new BluetoothPermissionCheckStrategy(context)
         );
     }
 
@@ -233,13 +231,12 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         }
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onServiceConnected(int profile, BluetoothProfile bluetoothProfile) {
         headsetProxy = (BluetoothHeadset) bluetoothProfile;
         for (BluetoothDevice device : bluetoothProfile.getConnectedDevices()) {
-            if (
-                ActivityCompat.checkSelfPermission(this.context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (!this.permissionsRequestStrategy.hasPermissions()) {
                 return;
             }
 
@@ -268,12 +265,10 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
             BluetoothDeviceWrapper bluetoothDevice = getHeadsetDevice(intent);
             if (bluetoothDevice != null) {
                 int state = intent.getIntExtra(BluetoothHeadset.EXTRA_STATE, STATE_DISCONNECTED);
-                if (
-                    ActivityCompat.checkSelfPermission(this.context, Manifest.permission.BLUETOOTH_CONNECT) !=
-                    PackageManager.PERMISSION_GRANTED
-                ) {
+                if (!this.permissionsRequestStrategy.hasPermissions()) {
                     return;
                 }
+
                 switch (state) {
                     case STATE_CONNECTED:
                         this.logger.d(TAG, "Bluetooth headset " + bluetoothDevice.getName() + " connected");
@@ -376,12 +371,10 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         }
     }
 
-    // TODO Remove bluetoothHeadsetName param
-    public AudioDevice.BluetoothHeadset getHeadset(String bluetoothHeadsetName) {
+    public AudioDevice.BluetoothHeadset getHeadset() {
         if (hasPermissions()) {
             if (headsetState != HeadsetState.Disconnected) {
-                String headsetName = bluetoothHeadsetName != null ? bluetoothHeadsetName : getHeadsetName();
-                return new AudioDevice.BluetoothHeadset(headsetName != null ? headsetName : "");
+                return new AudioDevice.BluetoothHeadset();
             } else {
                 return null;
             }
@@ -415,12 +408,11 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         return headsetState == HeadsetState.AudioActivated && hasConnectedDevice() && !hasActiveHeadset();
     }
 
+    @SuppressLint("MissingPermission")
     private String getHeadsetName() {
         if (headsetProxy != null) {
-            if (
-                ActivityCompat.checkSelfPermission(this.context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return "";
+            if (!this.permissionsRequestStrategy.hasPermissions()) {
+                return null;
             }
 
             List<BluetoothDevice> devices = headsetProxy.getConnectedDevices();
@@ -444,11 +436,10 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         return null;
     }
 
+    @SuppressLint("MissingPermission")
     private boolean hasActiveHeadset() {
         if (headsetProxy != null) {
-            if (
-                ActivityCompat.checkSelfPermission(this.context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (!this.permissionsRequestStrategy.hasPermissions()) {
                 return false;
             }
 
@@ -464,11 +455,10 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         return false;
     }
 
+    @SuppressLint("MissingPermission")
     private boolean hasConnectedDevice() {
         if (headsetProxy != null) {
-            if (
-                ActivityCompat.checkSelfPermission(this.context, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (!this.permissionsRequestStrategy.hasPermissions()) {
                 return false;
             }
 
@@ -481,7 +471,11 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
     }
 
     private BluetoothDeviceWrapper getHeadsetDevice(Intent intent) {
-        BluetoothDeviceWrapper deviceWrapper = bluetoothIntentProcessor.getBluetoothDevice(this.context, intent);
+        BluetoothDeviceWrapper deviceWrapper = null;
+        if (permissionsRequestStrategy.hasPermissions()) {
+            deviceWrapper = bluetoothIntentProcessor.getBluetoothDevice(intent);
+        }
+
         if (deviceWrapper != null) {
             if (isHeadsetDevice(deviceWrapper)) {
                 return deviceWrapper;
@@ -577,25 +571,6 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         @Override
         protected void scoTimeOutAction() {
             headsetState = HeadsetState.AudioActivationError;
-        }
-    }
-}
-
-class DefaultPermissionsCheckStrategy implements PermissionsCheckStrategy {
-
-    private Context context;
-
-    public DefaultPermissionsCheckStrategy(final Context context) {
-        this.context = context;
-    }
-
-    @Override
-    public boolean hasPermissions() {
-        if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.R || Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-            return context.checkSelfPermission(Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED;
-        } else {
-            // for android 12/S or newer
-            return context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
         }
     }
 }

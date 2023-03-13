@@ -17,10 +17,6 @@ public abstract class AudioDevice {
             this.name = "bluetooth";
         }
 
-        public BluetoothHeadset(String name) {
-            this.name = name;
-        }
-
         @Override
         public String getName() {
             return name;

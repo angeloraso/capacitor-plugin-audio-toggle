@@ -46,7 +46,7 @@ public class AudioToggle {
     private BluetoothHeadsetConnectionListener bluetoothDeviceConnectionListener = new BluetoothHeadsetConnectionListener() {
         @Override
         public void onBluetoothHeadsetStateChanged(String headsetName) {
-            enumerateDevices(headsetName);
+            enumerateDevices();
         }
 
         @Override
@@ -54,7 +54,7 @@ public class AudioToggle {
             if (userSelectedDevice instanceof BluetoothHeadset) {
                 userSelectedDevice = null;
             }
-            enumerateDevices(null);
+            enumerateDevices();
         }
     };
 
@@ -62,13 +62,13 @@ public class AudioToggle {
         @Override
         public void onDeviceConnected() {
             wiredHeadsetAvailable = true;
-            enumerateDevices(null);
+            enumerateDevices();
         }
 
         @Override
         public void onDeviceDisconnected() {
             wiredHeadsetAvailable = false;
-            enumerateDevices(null);
+            enumerateDevices();
         }
     };
 
@@ -102,7 +102,7 @@ public class AudioToggle {
     public void start() {
         switch (state) {
             case STOPPED:
-                enumerateDevices(null);
+                enumerateDevices();
                 if (bluetoothHeadsetManager != null) {
                     bluetoothHeadsetManager.start(bluetoothDeviceConnectionListener);
                 }
@@ -215,7 +215,7 @@ public class AudioToggle {
         if (selectedDevice != audioDevice) {
             logger.d(TAG, "Selected AudioDevice = " + audioDevice);
             userSelectedDevice = audioDevice;
-            enumerateDevices(null);
+            enumerateDevices();
         }
     }
 
@@ -292,11 +292,11 @@ public class AudioToggle {
         }
     }
 
-    private void enumerateDevices(String bluetoothHeadsetName) {
+    private void enumerateDevices() {
         // save off the old state and 'semi'-deep copy the list of audio devices
         AudioDeviceState oldAudioDeviceState = new AudioDeviceState(new ArrayList<>(mutableAudioDevices), selectedDevice);
         // update audio device list and selected device
-        addAvailableAudioDevices(bluetoothHeadsetName);
+        addAvailableAudioDevices();
 
         if (!userSelectedDevicePresent(mutableAudioDevices)) {
             userSelectedDevice = null;
@@ -339,13 +339,11 @@ public class AudioToggle {
         }
     }
 
-    private void addAvailableAudioDevices(String bluetoothHeadsetName) {
+    private void addAvailableAudioDevices() {
         mutableAudioDevices.clear();
         for (Class<? extends AudioDevice> audioDevice : preferredDeviceList) {
             if (audioDevice.equals(BluetoothHeadset.class)) {
-                BluetoothHeadset bluetoothHeadset = bluetoothHeadsetManager != null
-                    ? bluetoothHeadsetManager.getHeadset(bluetoothHeadsetName)
-                    : null;
+                BluetoothHeadset bluetoothHeadset = bluetoothHeadsetManager != null ? bluetoothHeadsetManager.getHeadset() : null;
                 if (bluetoothHeadset != null) {
                     mutableAudioDevices.add(bluetoothHeadset);
                 }
