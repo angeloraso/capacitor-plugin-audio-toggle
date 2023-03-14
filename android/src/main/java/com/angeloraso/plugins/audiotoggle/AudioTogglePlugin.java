@@ -131,4 +131,16 @@ public class AudioTogglePlugin extends Plugin {
             call.reject("Audio toggle plugin error: Audio mode is required");
         }
     }
+
+    @Override
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    public void removeAllListeners(PluginCall call) {
+        super.removeAllListeners(call);
+        unsetAppListeners();
+    }
+
+    private void unsetAppListeners() {
+        bridge.getApp().setStatusChangeListener(null);
+        bridge.getApp().setAppRestoredListener(null);
+    }
 }

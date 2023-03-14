@@ -21,6 +21,7 @@ npx cap sync
 * [`getAvailableDevices()`](#getavailabledevices)
 * [`getSelectedDevice()`](#getselecteddevice)
 * [`addListener('onChanges', ...)`](#addlisteneronchanges)
+* [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
 
@@ -112,6 +113,15 @@ addListener(eventName: 'onChanges', listenerFunc: (data: { earpiece: boolean; sp
 | **`listenerFunc`** | <code>(data: { earpiece: boolean; speakerphone: boolean; wired: boolean; bluetooth: boolean; selectedDevice: <a href="#devicename">DeviceName</a>; }) =&gt; void</code> |
 
 **Returns:** <code>Promise&lt;<a href="#pluginlistenerhandle">PluginListenerHandle</a>&gt; & <a href="#pluginlistenerhandle">PluginListenerHandle</a></code>
+
+--------------------
+
+
+### removeAllListeners()
+
+```typescript
+removeAllListeners() => Promise<void>
+```
 
 --------------------
 
