@@ -6,8 +6,6 @@ export interface AudioTogglePlugin {
   enable(): Promise<void>;
   disable(): Promise<void>;
   selectDevice(data: {device: DeviceName}): Promise<void>;
-  activate(): Promise<void>;
-  deactivate(): Promise<void>;
   getAvailableDevices(): Promise<{earpiece: boolean, speakerphone: boolean, wired: boolean, bluetooth: boolean}>;
   getSelectedDevice(): Promise<{selectedDevice: DeviceName}>;
 

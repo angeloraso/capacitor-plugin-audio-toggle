@@ -202,6 +202,14 @@ public class AudioToggle {
      * [bluetooth], [wired], [earpiece], [speakerphone].
      */
     public void selectDevice(String deviceName) {
+        switch (state) {
+            case STARTED:
+                activate();
+                break;
+            case ACTIVATED:
+            case STOPPED:
+                break;
+        }
         AudioDevice audioDevice;
 
         Optional<AudioDevice> result = mutableAudioDevices.stream().filter(_device -> _device.getName().equals(deviceName)).findFirst();

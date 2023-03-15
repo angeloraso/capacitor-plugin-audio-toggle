@@ -16,8 +16,6 @@ npx cap sync
 * [`enable()`](#enable)
 * [`disable()`](#disable)
 * [`selectDevice(...)`](#selectdevice)
-* [`activate()`](#activate)
-* [`deactivate()`](#deactivate)
 * [`getAvailableDevices()`](#getavailabledevices)
 * [`getSelectedDevice()`](#getselecteddevice)
 * [`addListener('onChanges', ...)`](#addlisteneronchanges)
@@ -57,24 +55,6 @@ selectDevice(data: { device: DeviceName; }) => Promise<void>
 | Param      | Type                                                           |
 | ---------- | -------------------------------------------------------------- |
 | **`data`** | <code>{ device: <a href="#devicename">DeviceName</a>; }</code> |
-
---------------------
-
-
-### activate()
-
-```typescript
-activate() => Promise<void>
-```
-
---------------------
-
-
-### deactivate()
-
-```typescript
-deactivate() => Promise<void>
-```
 
 --------------------
 

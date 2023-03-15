@@ -251,7 +251,7 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
     @Override
     public void onServiceDisconnected(int profile) {
         logger.d(TAG, "Bluetooth disconnected");
-        headsetState = HeadsetState.Disconnected;
+        setHeadsetState(HeadsetState.Disconnected);
         if (headsetListener != null) {
             headsetListener.onBluetoothHeadsetStateChanged(null);
         }
@@ -285,7 +285,7 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
                     case STATE_AUDIO_CONNECTED:
                         this.logger.d(TAG, "Bluetooth audio connected on device " + bluetoothDevice.getName());
                         enableBluetoothScoJob.cancelBluetoothScoJob();
-                        headsetState = HeadsetState.AudioActivated;
+                        setHeadsetState(HeadsetState.AudioActivated);
                         if (headsetListener != null) {
                             headsetListener.onBluetoothHeadsetStateChanged(null);
                         }
@@ -388,17 +388,17 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
 
     private void connect() {
         if (!hasActiveHeadset()) {
-            headsetState = HeadsetState.Connected;
+            setHeadsetState(HeadsetState.Connected);
         }
     }
 
     private void disconnect() {
         if (hasActiveHeadset()) {
-            headsetState = HeadsetState.AudioActivated;
+            setHeadsetState(HeadsetState.AudioActivated);
         } else if (hasConnectedDevice()) {
-            headsetState = HeadsetState.Connected;
+            setHeadsetState(HeadsetState.Connected);
         } else {
-            headsetState = HeadsetState.Disconnected;
+            setHeadsetState(HeadsetState.Disconnected);
         }
     }
 
@@ -539,12 +539,12 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         protected void scoAction() {
             logger.d(TAG, "Attempting to enable bluetooth SCO");
             this.audioDeviceManager.enableBluetoothSco(true);
-            headsetState = HeadsetState.AudioActivating;
+            setHeadsetState(HeadsetState.AudioActivating);
         }
 
         @Override
         protected void scoTimeOutAction() {
-            headsetState = HeadsetState.AudioActivationError;
+            setHeadsetState(HeadsetState.AudioActivationError);
             if (headsetListener != null) {
                 headsetListener.onBluetoothHeadsetActivationError();
             }
@@ -569,12 +569,12 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         protected void scoAction() {
             logger.d(TAG, "Attempting to disable bluetooth SCO");
             this.audioDeviceManager.enableBluetoothSco(false);
-            headsetState = HeadsetState.Connected;
+            setHeadsetState(HeadsetState.Connected);
         }
 
         @Override
         protected void scoTimeOutAction() {
-            headsetState = HeadsetState.AudioActivationError;
+            setHeadsetState(HeadsetState.AudioActivationError);
         }
     }
 }

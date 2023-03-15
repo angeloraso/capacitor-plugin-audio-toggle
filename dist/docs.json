@@ -44,26 +44,6 @@
         "slug": "selectdevice"
       },
       {
-        "name": "activate",
-        "signature": "() => Promise<void>",
-        "parameters": [],
-        "returns": "Promise<void>",
-        "tags": [],
-        "docs": "",
-        "complexTypes": [],
-        "slug": "activate"
-      },
-      {
-        "name": "deactivate",
-        "signature": "() => Promise<void>",
-        "parameters": [],
-        "returns": "Promise<void>",
-        "tags": [],
-        "docs": "",
-        "complexTypes": [],
-        "slug": "deactivate"
-      },
-      {
         "name": "getAvailableDevices",
         "signature": "() => Promise<{ earpiece: boolean; speakerphone: boolean; wired: boolean; bluetooth: boolean; }>",
         "parameters": [],
