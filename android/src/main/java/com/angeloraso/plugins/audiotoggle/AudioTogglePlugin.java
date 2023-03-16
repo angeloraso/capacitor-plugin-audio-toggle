@@ -106,7 +106,7 @@ public class AudioTogglePlugin extends Plugin {
             audioToggle.selectDevice(device);
             call.resolve();
         } else {
-            call.reject("Audio toggle plugin error: Audio mode is required");
+            call.reject("Audio toggle plugin error: Device is required");
         }
     }
 

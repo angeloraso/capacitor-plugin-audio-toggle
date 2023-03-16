@@ -1,5 +1,6 @@
 package com.angeloraso.plugins.audiotoggle;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioDeviceInfo;
@@ -9,6 +10,7 @@ import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.os.Build;
 import com.angeloraso.plugins.audiotoggle.android.BuildWrapper;
 import com.angeloraso.plugins.audiotoggle.android.Logger;
+import java.util.List;
 
 public class AudioDeviceManager {
 
@@ -63,14 +65,7 @@ public class AudioDeviceManager {
         if (
             build.getVersion() >= Build.VERSION_CODES.M && context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUDIO_OUTPUT)
         ) {
-            AudioDeviceInfo[] devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
-            for (AudioDeviceInfo device : devices) {
-                if (device.getType() == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) {
-                    logger.d(TAG, "Speakerphone available");
-                    return true;
-                }
-            }
-            return false;
+            return getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER) != null;
         } else {
             logger.d(TAG, "Speakerphone available");
             return true;
@@ -89,19 +84,50 @@ public class AudioDeviceManager {
          * best possible VoIP performance. Some devices have difficulties with speaker mode
          * if this is not set.
          */
-        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-    }
-
-    public void enableBluetoothSco(boolean enable) {
-        if (enable) {
-            audioManager.startBluetoothSco();
-        } else {
-            audioManager.stopBluetoothSco();
+        if (!isAndroid12OrNewer()) {
+            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         }
     }
 
+    @SuppressLint("NewApi")
+    public void enableBluetoothSco(boolean enable) {
+        if (isAndroid12OrNewer()) {
+            if (enable) {
+                AudioDeviceInfo bluetoothDevice = getAudioDevice(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
+                audioManager.setCommunicationDevice(bluetoothDevice);
+            } else {
+                audioManager.clearCommunicationDevice();
+            }
+        } else {
+            if (enable) {
+                audioManager.startBluetoothSco();
+            } else {
+                audioManager.stopBluetoothSco();
+            }
+        }
+    }
+
+    @SuppressLint("NewApi")
     public void enableSpeakerphone(boolean enable) {
-        audioManager.setSpeakerphoneOn(enable);
+        if (isAndroid12OrNewer()) {
+            audioManager.clearCommunicationDevice();
+            if (enable) {
+                AudioDeviceInfo speakerDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
+                boolean result = audioManager.setCommunicationDevice(speakerDevice);
+                if (!result) {
+                    logger.d(TAG, "Speakerphone error");
+                }
+            } else {
+                AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
+                audioManager.setMode(AudioManager.MODE_NORMAL);
+                boolean result = audioManager.setCommunicationDevice(earpieceDevice);
+                if (!result) {
+                    logger.d(TAG, "Earpiece error");
+                }
+            }
+        } else {
+            audioManager.setSpeakerphoneOn(enable);
+        }
     }
 
     public void mute(boolean mute) {
@@ -122,5 +148,18 @@ public class AudioDeviceManager {
         if (audioRequest != null) {
             audioManager.abandonAudioFocusRequest(audioRequest);
         }
+    }
+
+    private boolean isAndroid12OrNewer() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
+    }
+
+    private AudioDeviceInfo getAudioDevice(Integer type) {
+        AudioDeviceInfo[] devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
+        for (AudioDeviceInfo device : devices) {
+            if (type == device.getType()) return device;
+        }
+
+        return null;
     }
 }

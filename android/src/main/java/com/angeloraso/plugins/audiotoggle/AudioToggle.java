@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 public class AudioToggle {
 
     private static final String TAG = "AudioToggle";
-    private final Context context;
     private final Logger logger;
     private AudioDeviceManager audioDeviceManager;
     private WiredHeadsetReceiver wiredHeadsetReceiver;
@@ -84,7 +83,6 @@ public class AudioToggle {
     List<AudioDevice> availableAudioDevices = mutableAudioDevices;
 
     public AudioToggle(final Context context, boolean log) {
-        this.context = context;
         this.logger = new ProductionLogger(log);
 
         this.audioDeviceManager =

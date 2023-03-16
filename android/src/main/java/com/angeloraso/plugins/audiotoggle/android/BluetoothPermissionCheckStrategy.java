@@ -15,11 +15,11 @@ public class BluetoothPermissionCheckStrategy implements PermissionsCheckStrateg
 
     @Override
     public boolean hasPermissions() {
-        if (context.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.R || Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
-            return context.checkSelfPermission(Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED;
-        } else {
-            // for android 12/S or newer
+        // for android 12/S or newer
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             return context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED;
+        } else {
+            return context.checkSelfPermission(Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED;
         }
     }
 }
