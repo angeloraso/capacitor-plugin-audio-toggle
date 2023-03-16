@@ -3,6 +3,7 @@ export declare type DeviceName = 'earpiece' | 'speakerphone' | 'wired' | 'blueto
 export interface AudioTogglePlugin {
     enable(): Promise<void>;
     disable(): Promise<void>;
+    reset(): Promise<void>;
     selectDevice(data: {
         device: DeviceName;
     }): Promise<void>;

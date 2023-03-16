@@ -15,6 +15,7 @@ npx cap sync
 
 * [`enable()`](#enable)
 * [`disable()`](#disable)
+* [`reset()`](#reset)
 * [`selectDevice(...)`](#selectdevice)
 * [`getAvailableDevices()`](#getavailabledevices)
 * [`getSelectedDevice()`](#getselecteddevice)
@@ -41,6 +42,15 @@ enable() => Promise<void>
 
 ```typescript
 disable() => Promise<void>
+```
+
+--------------------
+
+
+### reset()
+
+```typescript
+reset() => Promise<void>
 ```
 
 --------------------

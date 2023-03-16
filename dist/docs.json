@@ -26,6 +26,16 @@
         "slug": "disable"
       },
       {
+        "name": "reset",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "reset"
+      },
+      {
         "name": "selectDevice",
         "signature": "(data: { device: DeviceName; }) => Promise<void>",
         "parameters": [
