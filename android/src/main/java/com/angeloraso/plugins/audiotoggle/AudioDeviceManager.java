@@ -111,15 +111,29 @@ public class AudioDeviceManager {
             audioManager.clearCommunicationDevice();
             if (enable) {
                 AudioDeviceInfo speakerDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
-                boolean result = audioManager.setCommunicationDevice(speakerDevice);
-                if (!result) {
+                boolean success = audioManager.setCommunicationDevice(speakerDevice);
+                if (success) {
+                    audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
+                    audioManager.adjustStreamVolume(
+                        AudioManager.STREAM_VOICE_CALL,
+                        AudioManager.ADJUST_RAISE,
+                        AudioManager.FLAG_PLAY_SOUND
+                    );
+                } else {
                     logger.d(TAG, "Speakerphone error");
                 }
             } else {
-                audioManager.setMode(AudioManager.MODE_NORMAL);
                 AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
-                boolean result = audioManager.setCommunicationDevice(earpieceDevice);
-                if (!result) {
+                boolean success = audioManager.setCommunicationDevice(earpieceDevice);
+                if (success) {
+                    audioManager.setMode(AudioManager.MODE_NORMAL);
+                    audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+                    audioManager.adjustStreamVolume(
+                        AudioManager.STREAM_VOICE_CALL,
+                        AudioManager.ADJUST_LOWER,
+                        AudioManager.FLAG_PLAY_SOUND
+                    );
+                } else {
                     logger.d(TAG, "Earpiece error");
                 }
             }

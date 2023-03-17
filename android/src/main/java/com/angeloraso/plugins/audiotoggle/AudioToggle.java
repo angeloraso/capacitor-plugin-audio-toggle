@@ -66,8 +66,10 @@ public class AudioToggle {
 
         @Override
         public void onDeviceDisconnected() {
-            wiredHeadsetAvailable = false;
-            enumerateDevices();
+            if (wiredHeadsetAvailable) {
+                wiredHeadsetAvailable = false;
+                enumerateDevices();
+            }
         }
     };
 
@@ -153,8 +155,8 @@ public class AudioToggle {
                 // Always set mute to false for WebRTC
                 audioDeviceManager.mute(false);
                 audioDeviceManager.setAudioFocus();
-                if (selectedDevice != null) {
-                    activate(selectedDevice);
+                if (userSelectedDevice != null) {
+                    activate(userSelectedDevice);
                 }
                 enumerateDevices();
                 state = State.ACTIVATED;
@@ -197,30 +199,22 @@ public class AudioToggle {
      * [bluetooth], [wired], [earpiece], [speakerphone].
      */
     public void selectDevice(String deviceName) {
-        switch (state) {
-            case STARTED:
-                activate();
-                break;
-            case ACTIVATED:
-                AudioDevice audioDevice;
+        AudioDevice audioDevice;
 
-                Optional<AudioDevice> result = mutableAudioDevices
-                    .stream()
-                    .filter(_device -> _device.getName().equals(deviceName))
-                    .findFirst();
+        Optional<AudioDevice> result = mutableAudioDevices.stream().filter(_device -> _device.getName().equals(deviceName)).findFirst();
 
-                if (result.isPresent()) {
-                    audioDevice = result.get();
-                } else {
-                    audioDevice = selectedDevice;
-                }
+        if (result.isPresent()) {
+            audioDevice = result.get();
+        } else {
+            audioDevice = selectedDevice;
+        }
 
-                if (selectedDevice != audioDevice) {
-                    logger.d(TAG, "Selected AudioDevice = " + audioDevice);
-                    userSelectedDevice = audioDevice;
-                    enumerateDevices();
-                }
-                break;
+        logger.d(TAG, "Selected AudioDevice = " + audioDevice);
+        userSelectedDevice = audioDevice;
+        if (state == State.STARTED) {
+            activate();
+        } else {
+            enumerateDevices();
         }
     }
 
