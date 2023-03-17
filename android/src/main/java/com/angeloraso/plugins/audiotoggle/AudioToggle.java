@@ -61,6 +61,7 @@ public class AudioToggle {
         @Override
         public void onDeviceConnected() {
             wiredHeadsetAvailable = true;
+            userSelectedDevice = new AudioDevice.WiredHeadset();
             enumerateDevices();
         }
 
@@ -68,6 +69,7 @@ public class AudioToggle {
         public void onDeviceDisconnected() {
             if (wiredHeadsetAvailable) {
                 wiredHeadsetAvailable = false;
+                userSelectedDevice = selectedDevice;
                 enumerateDevices();
             }
         }
@@ -247,17 +249,24 @@ public class AudioToggle {
 
     private void activate(AudioDevice audioDevice) {
         if (audioDevice instanceof BluetoothHeadset) {
-            audioDeviceManager.enableSpeakerphone(false);
+            audioDeviceManager.disableSpeakerphone();
             if (bluetoothHeadsetManager != null) {
                 bluetoothHeadsetManager.activate();
             }
-        } else if (audioDevice instanceof Earpiece || audioDevice instanceof WiredHeadset) {
-            audioDeviceManager.enableSpeakerphone(false);
+        } else if (audioDevice instanceof Earpiece) {
+            audioDeviceManager.disableSpeakerphone();
+            audioDeviceManager.enableEarpiece();
+            if (bluetoothHeadsetManager != null) {
+                bluetoothHeadsetManager.deactivate();
+            }
+        } else if (audioDevice instanceof WiredHeadset) {
+            audioDeviceManager.disableSpeakerphone();
+            audioDeviceManager.enableWired();
             if (bluetoothHeadsetManager != null) {
                 bluetoothHeadsetManager.deactivate();
             }
         } else if (audioDevice instanceof Speakerphone) {
-            audioDeviceManager.enableSpeakerphone(true);
+            audioDeviceManager.enableSpeakerphone();
             if (bluetoothHeadsetManager != null) {
                 bluetoothHeadsetManager.deactivate();
             }

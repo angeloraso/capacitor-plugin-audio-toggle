@@ -99,47 +99,74 @@ public class AudioDeviceManager {
         }
     }
 
-    public void enableSpeakerphone(boolean enable) {
+    public void enableSpeakerphone() {
+        if (isAndroid12OrNewer()) {
+            audioManager.clearCommunicationDevice();
+            AudioDeviceInfo speakerDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
+            boolean success = audioManager.setCommunicationDevice(speakerDevice);
+            if (success) {
+                audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
+                audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
+            } else {
+                logger.d(TAG, "Speakerphone error");
+            }
+        } else {
+            audioManager.setMode(AudioManager.MODE_NORMAL);
+            audioManager.setSpeakerphoneOn(true);
+        }
+
         if (!audioManager.isSpeakerphoneOn() && samsungPattern.matcher(Build.MODEL).find()) {
             AudioDeviceInfo usbDevice = getAudioDevice(AudioDeviceInfo.TYPE_USB_HEADSET);
             if (usbDevice != null) {
                 audioManager.setMode(AudioManager.MODE_NORMAL);
             }
         }
+    }
 
+    public void disableSpeakerphone() {
+        if (!isAndroid12OrNewer()) {
+            audioManager.setSpeakerphoneOn(false);
+        }
+    }
+
+    public void enableEarpiece() {
         if (isAndroid12OrNewer()) {
             audioManager.clearCommunicationDevice();
-            if (enable) {
-                AudioDeviceInfo speakerDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
-                boolean success = audioManager.setCommunicationDevice(speakerDevice);
-                if (success) {
-                    audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
-                    audioManager.adjustStreamVolume(
-                        AudioManager.STREAM_VOICE_CALL,
-                        AudioManager.ADJUST_RAISE,
-                        AudioManager.FLAG_PLAY_SOUND
-                    );
-                } else {
-                    logger.d(TAG, "Speakerphone error");
-                }
+            AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
+            boolean success = audioManager.setCommunicationDevice(earpieceDevice);
+            if (success) {
+                audioManager.setMode(AudioManager.MODE_NORMAL);
+                audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+                audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
             } else {
-                AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
-                boolean success = audioManager.setCommunicationDevice(earpieceDevice);
-                if (success) {
-                    audioManager.setMode(AudioManager.MODE_NORMAL);
-                    audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
-                    audioManager.adjustStreamVolume(
-                        AudioManager.STREAM_VOICE_CALL,
-                        AudioManager.ADJUST_LOWER,
-                        AudioManager.FLAG_PLAY_SOUND
-                    );
-                } else {
-                    logger.d(TAG, "Earpiece error");
-                }
+                logger.d(TAG, "Earpiece error");
             }
         } else {
             audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-            audioManager.setSpeakerphoneOn(enable);
+            disableSpeakerphone();
+        }
+    }
+
+    public void enableWired() {
+        if (isAndroid12OrNewer()) {
+            audioManager.clearCommunicationDevice();
+            AudioDeviceInfo wiredHeadsetDevice = getAudioDevice(AudioDeviceInfo.TYPE_WIRED_HEADSET);
+            AudioDeviceInfo wiredHeadphonesDevice = getAudioDevice(AudioDeviceInfo.TYPE_WIRED_HEADPHONES);
+            boolean success;
+            if (wiredHeadsetDevice != null) {
+                success = audioManager.setCommunicationDevice(wiredHeadsetDevice);
+            } else {
+                success = audioManager.setCommunicationDevice(wiredHeadphonesDevice);
+            }
+            if (success) {
+                audioManager.setMode(AudioManager.MODE_NORMAL);
+                audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+                audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+            } else {
+                logger.d(TAG, "Earpiece error");
+            }
+        } else {
+            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
         }
     }
 
@@ -158,10 +185,13 @@ public class AudioDeviceManager {
         if (isAndroid12OrNewer()) {
             audioManager.clearCommunicationDevice();
         }
-        audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
         audioManager.setMode(savedAudioMode);
         mute(savedIsMicrophoneMuted);
-        enableSpeakerphone(savedSpeakerphoneEnabled);
+        if (savedSpeakerphoneEnabled) {
+            enableSpeakerphone();
+        } else {
+            disableSpeakerphone();
+        }
         if (audioRequest != null) {
             audioManager.abandonAudioFocusRequest(audioRequest);
         }
