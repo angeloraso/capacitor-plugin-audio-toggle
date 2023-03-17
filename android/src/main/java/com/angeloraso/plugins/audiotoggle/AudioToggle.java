@@ -75,10 +75,6 @@ public class AudioToggle {
         return logger.isLoggingEnabled();
     }
 
-    public void setLoggingEnabled(boolean value) {
-        logger.setLoggingEnabled(value);
-    }
-
     AudioDevice selectedAudioDevice = selectedDevice;
     List<AudioDevice> availableAudioDevices = mutableAudioDevices;
 
@@ -160,6 +156,7 @@ public class AudioToggle {
                 if (selectedDevice != null) {
                     activate(selectedDevice);
                 }
+                enumerateDevices();
                 state = State.ACTIVATED;
                 break;
             case ACTIVATED:
@@ -205,23 +202,25 @@ public class AudioToggle {
                 activate();
                 break;
             case ACTIVATED:
-            case STOPPED:
+                AudioDevice audioDevice;
+
+                Optional<AudioDevice> result = mutableAudioDevices
+                    .stream()
+                    .filter(_device -> _device.getName().equals(deviceName))
+                    .findFirst();
+
+                if (result.isPresent()) {
+                    audioDevice = result.get();
+                } else {
+                    audioDevice = selectedDevice;
+                }
+
+                if (selectedDevice != audioDevice) {
+                    logger.d(TAG, "Selected AudioDevice = " + audioDevice);
+                    userSelectedDevice = audioDevice;
+                    enumerateDevices();
+                }
                 break;
-        }
-        AudioDevice audioDevice;
-
-        Optional<AudioDevice> result = mutableAudioDevices.stream().filter(_device -> _device.getName().equals(deviceName)).findFirst();
-
-        if (result.isPresent()) {
-            audioDevice = result.get();
-        } else {
-            audioDevice = selectedDevice;
-        }
-
-        if (selectedDevice != audioDevice) {
-            logger.d(TAG, "Selected AudioDevice = " + audioDevice);
-            userSelectedDevice = audioDevice;
-            enumerateDevices();
         }
     }
 
@@ -276,24 +275,8 @@ public class AudioToggle {
         private List<AudioDevice> audioDeviceList;
         private AudioDevice selectedAudioDevice;
 
-        public AudioDeviceState(List<AudioDevice> audioDeviceList, AudioDevice selectedAudioDevice) {
+        AudioDeviceState(List<AudioDevice> audioDeviceList, AudioDevice selectedAudioDevice) {
             this.audioDeviceList = audioDeviceList;
-            this.selectedAudioDevice = selectedAudioDevice;
-        }
-
-        public List<AudioDevice> getAudioDeviceList() {
-            return audioDeviceList;
-        }
-
-        public void setAudioDeviceList(List<AudioDevice> audioDeviceList) {
-            this.audioDeviceList = audioDeviceList;
-        }
-
-        public AudioDevice getSelectedAudioDevice() {
-            return selectedAudioDevice;
-        }
-
-        public void setSelectedAudioDevice(AudioDevice selectedAudioDevice) {
             this.selectedAudioDevice = selectedAudioDevice;
         }
     }

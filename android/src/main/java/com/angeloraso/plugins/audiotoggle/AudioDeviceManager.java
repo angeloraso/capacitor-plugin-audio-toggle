@@ -1,6 +1,5 @@
 package com.angeloraso.plugins.audiotoggle;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioDeviceInfo;
@@ -11,6 +10,7 @@ import android.os.Build;
 import com.angeloraso.plugins.audiotoggle.android.BuildWrapper;
 import com.angeloraso.plugins.audiotoggle.android.Logger;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class AudioDeviceManager {
 
@@ -27,6 +27,8 @@ public class AudioDeviceManager {
     private boolean savedIsMicrophoneMuted = false;
     private boolean savedSpeakerphoneEnabled = false;
     private AudioFocusRequest audioRequest = null;
+
+    private final Pattern samsungPattern = Pattern.compile("^SM-G(960|99)");
 
     public AudioDeviceManager(
         Context context,
@@ -80,7 +82,6 @@ public class AudioDeviceManager {
         }
     }
 
-    @SuppressLint("NewApi")
     public void enableBluetoothSco(boolean enable) {
         if (isAndroid12OrNewer()) {
             if (enable) {
@@ -98,14 +99,16 @@ public class AudioDeviceManager {
         }
     }
 
-    @SuppressLint("NewApi")
     public void enableSpeakerphone(boolean enable) {
-        audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
+        if (!audioManager.isSpeakerphoneOn() && samsungPattern.matcher(Build.MODEL).find()) {
+            AudioDeviceInfo usbDevice = getAudioDevice(AudioDeviceInfo.TYPE_USB_HEADSET);
+            if (usbDevice != null) {
+                audioManager.setMode(AudioManager.MODE_NORMAL);
+            }
+        }
 
         if (isAndroid12OrNewer()) {
-            if (audioManager.isVolumeFixed()) {
-                logger.d(TAG, "Volume fixed");
-            }
+            audioManager.clearCommunicationDevice();
             if (enable) {
                 AudioDeviceInfo speakerDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
                 boolean result = audioManager.setCommunicationDevice(speakerDevice);
@@ -114,7 +117,6 @@ public class AudioDeviceManager {
                 }
             } else {
                 audioManager.setMode(AudioManager.MODE_NORMAL);
-                audioManager.clearCommunicationDevice();
                 AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
                 boolean result = audioManager.setCommunicationDevice(earpieceDevice);
                 if (!result) {
