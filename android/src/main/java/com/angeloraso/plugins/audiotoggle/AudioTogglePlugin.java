@@ -7,7 +7,6 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @CapacitorPlugin(name = "AudioToggle")
 public class AudioTogglePlugin extends Plugin {

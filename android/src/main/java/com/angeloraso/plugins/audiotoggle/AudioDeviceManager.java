@@ -78,15 +78,6 @@ public class AudioDeviceManager {
         if (audioRequest != null) {
             audioManager.requestAudioFocus(audioRequest);
         }
-        /*
-         * Start by setting MODE_IN_COMMUNICATION as default audio mode. It is
-         * required to be in this mode when playout and/or recording starts for
-         * best possible VoIP performance. Some devices have difficulties with speaker mode
-         * if this is not set.
-         */
-        if (!isAndroid12OrNewer()) {
-            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-        }
     }
 
     @SuppressLint("NewApi")
@@ -109,8 +100,12 @@ public class AudioDeviceManager {
 
     @SuppressLint("NewApi")
     public void enableSpeakerphone(boolean enable) {
+        audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
+
         if (isAndroid12OrNewer()) {
-            audioManager.clearCommunicationDevice();
+            if (audioManager.isVolumeFixed()) {
+                logger.d(TAG, "Volume fixed");
+            }
             if (enable) {
                 AudioDeviceInfo speakerDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
                 boolean result = audioManager.setCommunicationDevice(speakerDevice);
@@ -118,14 +113,16 @@ public class AudioDeviceManager {
                     logger.d(TAG, "Speakerphone error");
                 }
             } else {
-                AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
                 audioManager.setMode(AudioManager.MODE_NORMAL);
+                audioManager.clearCommunicationDevice();
+                AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
                 boolean result = audioManager.setCommunicationDevice(earpieceDevice);
                 if (!result) {
                     logger.d(TAG, "Earpiece error");
                 }
             }
         } else {
+            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             audioManager.setSpeakerphoneOn(enable);
         }
     }
@@ -142,6 +139,10 @@ public class AudioDeviceManager {
     }
 
     public void restoreAudioState() {
+        if (isAndroid12OrNewer()) {
+            audioManager.clearCommunicationDevice();
+        }
+        audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
         audioManager.setMode(savedAudioMode);
         mute(savedIsMicrophoneMuted);
         enableSpeakerphone(savedSpeakerphoneEnabled);
@@ -155,9 +156,16 @@ public class AudioDeviceManager {
     }
 
     private AudioDeviceInfo getAudioDevice(Integer type) {
-        AudioDeviceInfo[] devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
-        for (AudioDeviceInfo device : devices) {
-            if (type == device.getType()) return device;
+        if (isAndroid12OrNewer()) {
+            List<AudioDeviceInfo> devices = audioManager.getAvailableCommunicationDevices();
+            for (AudioDeviceInfo device : devices) {
+                if (type == device.getType()) return device;
+            }
+        } else {
+            AudioDeviceInfo[] devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
+            for (AudioDeviceInfo device : devices) {
+                if (type == device.getType()) return device;
+            }
         }
 
         return null;
