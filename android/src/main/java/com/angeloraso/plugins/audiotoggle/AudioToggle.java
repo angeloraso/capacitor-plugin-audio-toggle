@@ -16,6 +16,7 @@ import com.angeloraso.plugins.audiotoggle.wired.WiredHeadsetReceiver;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ public class AudioToggle {
     private boolean wiredHeadsetAvailable = false;
     private ArrayList<AudioDevice> mutableAudioDevices = new ArrayList<>();
     private BluetoothHeadsetManager bluetoothHeadsetManager = null;
+    private String bluetoothHeadsetConnected = null;
     private List<Class<? extends AudioDevice>> preferredDeviceList;
 
     enum State {
@@ -45,7 +47,10 @@ public class AudioToggle {
     private BluetoothHeadsetConnectionListener bluetoothDeviceConnectionListener = new BluetoothHeadsetConnectionListener() {
         @Override
         public void onBluetoothHeadsetStateChanged(String headsetName) {
-            enumerateDevices();
+            if (!Objects.equals(bluetoothHeadsetConnected, headsetName)) {
+                bluetoothHeadsetConnected = headsetName;
+                enumerateDevices();
+            }
         }
 
         @Override
@@ -100,10 +105,10 @@ public class AudioToggle {
     public void start() {
         switch (state) {
             case STOPPED:
+                state = State.STARTED;
                 enumerateDevices();
                 startBluetoothListener();
                 startWiredConnectionListener();
-                state = State.STARTED;
                 break;
             default:
                 logger.d(TAG, "Redundant start() invocation while already in the started or activated state");
@@ -161,15 +166,14 @@ public class AudioToggle {
         switch (state) {
             case STARTED:
                 audioDeviceManager.cacheAudioState();
-
+                enumerateDevices();
+                state = State.ACTIVATED;
                 // Always set mute to false for WebRTC
                 audioDeviceManager.mute(false);
                 audioDeviceManager.setAudioFocus();
                 if (userSelectedDevice != null) {
                     activate(userSelectedDevice);
                 }
-                enumerateDevices();
-                state = State.ACTIVATED;
                 break;
             case ACTIVATED:
                 if (selectedDevice != null) {
@@ -188,13 +192,13 @@ public class AudioToggle {
     public void deactivate() {
         switch (state) {
             case ACTIVATED:
+                state = State.STARTED;
                 if (bluetoothHeadsetManager != null) {
                     bluetoothHeadsetManager.deactivate();
                 }
 
                 // Restore stored audio state
                 audioDeviceManager.restoreAudioState();
-                state = State.STARTED;
                 break;
             case STARTED:
             case STOPPED:
@@ -394,6 +398,7 @@ public class AudioToggle {
     }
 
     private void closeListeners() {
+        state = State.STOPPED;
         if (bluetoothHeadsetManager != null) {
             bluetoothHeadsetManager.stop();
         }
@@ -401,7 +406,6 @@ public class AudioToggle {
             wiredHeadsetReceiver.stop();
         }
         audioDeviceChangeListener = null;
-        state = State.STOPPED;
     }
 
     public static final List<Class<? extends AudioDevice>> defaultPreferredDeviceList = Arrays.asList(

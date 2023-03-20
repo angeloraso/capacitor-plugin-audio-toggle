@@ -287,7 +287,7 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
                         enableBluetoothScoJob.cancelBluetoothScoJob();
                         setHeadsetState(HeadsetState.AudioActivated);
                         if (headsetListener != null) {
-                            headsetListener.onBluetoothHeadsetStateChanged(null);
+                            headsetListener.onBluetoothHeadsetStateChanged(bluetoothDevice.getName());
                         }
                         break;
                     case STATE_AUDIO_DISCONNECTED:
@@ -541,7 +541,7 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         @Override
         protected void scoAction() {
             logger.d(TAG, "Attempting to enable bluetooth SCO");
-            this.audioDeviceManager.enableBluetoothSco(true);
+            audioDeviceManager.enableBluetoothSco(true);
             setHeadsetState(HeadsetState.AudioActivating);
         }
 
@@ -571,7 +571,7 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         @Override
         protected void scoAction() {
             logger.d(TAG, "Attempting to disable bluetooth SCO");
-            this.audioDeviceManager.enableBluetoothSco(false);
+            audioDeviceManager.enableBluetoothSco(false);
             setHeadsetState(HeadsetState.Connected);
         }
 
