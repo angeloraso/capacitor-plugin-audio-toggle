@@ -19,6 +19,8 @@ npx cap sync
 * [`selectDevice(...)`](#selectdevice)
 * [`getAvailableDevices()`](#getavailabledevices)
 * [`getSelectedDevice()`](#getselecteddevice)
+* [`checkPermissions()`](#checkpermissions)
+* [`requestPermissions()`](#requestpermissions)
 * [`addListener('onChanges', ...)`](#addlisteneronchanges)
 * [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
@@ -87,6 +89,28 @@ getSelectedDevice() => Promise<{ selectedDevice: DeviceName; }>
 ```
 
 **Returns:** <code>Promise&lt;{ selectedDevice: <a href="#devicename">DeviceName</a>; }&gt;</code>
+
+--------------------
+
+
+### checkPermissions()
+
+```typescript
+checkPermissions() => Promise<PermissionStatus>
+```
+
+**Returns:** <code>Promise&lt;any&gt;</code>
+
+--------------------
+
+
+### requestPermissions()
+
+```typescript
+requestPermissions() => Promise<PermissionStatus>
+```
+
+**Returns:** <code>Promise&lt;any&gt;</code>
 
 --------------------
 

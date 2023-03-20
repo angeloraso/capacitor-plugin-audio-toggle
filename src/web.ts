@@ -26,4 +26,12 @@ export class AudioToggleWeb extends WebPlugin implements AudioTogglePlugin {
   async getSelectedDevice(): Promise<{selectedDevice: DeviceName}>{
     throw this.unimplemented('Not implemented on web.');
   }
+
+  async checkPermissions(): Promise<PermissionStatus> {
+    throw this.unimplemented('Not implemented on web.');
+  }
+
+  async requestPermissions(): Promise<PermissionStatus> {
+    throw this.unimplemented('Not implemented on web.');
+  }
 }

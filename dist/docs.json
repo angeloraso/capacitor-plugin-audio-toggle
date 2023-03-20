@@ -76,6 +76,30 @@
         "slug": "getselecteddevice"
       },
       {
+        "name": "checkPermissions",
+        "signature": "() => Promise<PermissionStatus>",
+        "parameters": [],
+        "returns": "Promise<any>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [
+          "PermissionStatus"
+        ],
+        "slug": "checkpermissions"
+      },
+      {
+        "name": "requestPermissions",
+        "signature": "() => Promise<PermissionStatus>",
+        "parameters": [],
+        "returns": "Promise<any>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [
+          "PermissionStatus"
+        ],
+        "slug": "requestpermissions"
+      },
+      {
         "name": "addListener",
         "signature": "(eventName: 'onChanges', listenerFunc: (data: { earpiece: boolean; speakerphone: boolean; wired: boolean; bluetooth: boolean; selectedDevice: DeviceName; }) => void) => Promise<PluginListenerHandle> & PluginListenerHandle",
         "parameters": [

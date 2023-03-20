@@ -101,15 +101,23 @@ public class AudioToggle {
         switch (state) {
             case STOPPED:
                 enumerateDevices();
-                if (bluetoothHeadsetManager != null) {
-                    bluetoothHeadsetManager.start(bluetoothDeviceConnectionListener);
-                }
-                wiredHeadsetReceiver.start(wiredDeviceConnectionListener);
+                startBluetoothListener();
+                startWiredConnectionListener();
                 state = State.STARTED;
                 break;
             default:
                 logger.d(TAG, "Redundant start() invocation while already in the started or activated state");
         }
+    }
+
+    public void startBluetoothListener() {
+        if (bluetoothHeadsetManager != null) {
+            bluetoothHeadsetManager.start(bluetoothDeviceConnectionListener);
+        }
+    }
+
+    public void startWiredConnectionListener() {
+        wiredHeadsetReceiver.start(wiredDeviceConnectionListener);
     }
 
     /**

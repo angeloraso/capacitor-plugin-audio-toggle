@@ -16,6 +16,8 @@ export interface AudioTogglePlugin {
     getSelectedDevice(): Promise<{
         selectedDevice: DeviceName;
     }>;
+    checkPermissions(): Promise<PermissionStatus>;
+    requestPermissions(): Promise<PermissionStatus>;
     addListener(eventName: 'onChanges', listenerFunc: (data: {
         earpiece: boolean;
         speakerphone: boolean;

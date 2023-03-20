@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_finishing">Audio toggle plugin error: App is finishing</string>
+  <string name="permission_alias">audio_toggle_bluetooth</string>
+</resources>

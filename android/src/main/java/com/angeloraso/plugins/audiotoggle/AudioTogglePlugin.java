@@ -1,14 +1,22 @@
 package com.angeloraso.plugins.audiotoggle;
 
+import android.Manifest;
 import android.content.Context;
+import android.os.Build;
 import com.getcapacitor.JSObject;
+import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import com.getcapacitor.annotation.Permission;
+import com.getcapacitor.annotation.PermissionCallback;
 import java.util.List;
 
-@CapacitorPlugin(name = "AudioToggle")
+@CapacitorPlugin(
+    name = "AudioToggle",
+    permissions = { @Permission(alias = "audio_toggle_bluetooth", strings = { Manifest.permission.BLUETOOTH_CONNECT }) }
+)
 public class AudioTogglePlugin extends Plugin {
 
     private AudioToggle audioToggle;
@@ -21,11 +29,14 @@ public class AudioTogglePlugin extends Plugin {
     @PluginMethod
     public void enable(PluginCall call) {
         if (getActivity().isFinishing()) {
-            call.reject("Audio toggle plugin error: App is finishing");
+            call.reject(getActivity().getString(R.string.app_finishing));
             return;
         }
 
         audioToggle.setAudioToggleEventListener(this::onAudioToggleEvent);
+        if (Build.VERSION.SDK_INT >= 31 && !bluetoothPermissionIsGranted()) {
+            requestPermissions(call);
+        }
         audioToggle.start();
     }
 
@@ -50,7 +61,7 @@ public class AudioTogglePlugin extends Plugin {
     @PluginMethod
     public void disable(PluginCall call) {
         if (getActivity().isFinishing()) {
-            call.reject("Audio toggle plugin error: App is finishing");
+            call.reject(getActivity().getString(R.string.app_finishing));
             return;
         }
 
@@ -61,7 +72,7 @@ public class AudioTogglePlugin extends Plugin {
     @PluginMethod
     public void reset(PluginCall call) {
         if (getActivity().isFinishing()) {
-            call.reject("Audio toggle plugin error: App is finishing");
+            call.reject(getActivity().getString(R.string.app_finishing));
             return;
         }
 
@@ -72,7 +83,7 @@ public class AudioTogglePlugin extends Plugin {
     @PluginMethod
     public void getAvailableDevices(PluginCall call) {
         if (getActivity().isFinishing()) {
-            call.reject("Audio toggle plugin error: App is finishing");
+            call.reject(getActivity().getString(R.string.app_finishing));
             return;
         }
 
@@ -93,7 +104,7 @@ public class AudioTogglePlugin extends Plugin {
     @PluginMethod
     public void getSelectedDevice(PluginCall call) {
         if (getActivity().isFinishing()) {
-            call.reject("Audio toggle plugin error: App is finishing");
+            call.reject(getActivity().getString(R.string.app_finishing));
             return;
         }
 
@@ -106,7 +117,7 @@ public class AudioTogglePlugin extends Plugin {
     @PluginMethod
     public void selectDevice(PluginCall call) {
         if (getActivity().isFinishing()) {
-            call.reject("Audio toggle plugin error: App is finishing");
+            call.reject(getActivity().getString(R.string.app_finishing));
             return;
         }
 
@@ -126,6 +137,47 @@ public class AudioTogglePlugin extends Plugin {
         super.removeAllListeners(call);
         audioToggle.deactivate();
         unsetAppListeners();
+    }
+
+    @PluginMethod
+    public void checkPermissions(PluginCall call) {
+        if (getActivity().isFinishing()) {
+            String appFinishingMsg = getActivity().getString(R.string.app_finishing);
+            call.reject(appFinishingMsg);
+            return;
+        }
+
+        JSObject res = new JSObject();
+        res.put("granted", bluetoothPermissionIsGranted());
+        call.resolve(res);
+    }
+
+    @PluginMethod
+    public void requestPermissions(PluginCall call) {
+        if (getActivity().isFinishing()) {
+            String appFinishingMsg = getActivity().getString(R.string.app_finishing);
+            call.reject(appFinishingMsg);
+            return;
+        }
+
+        if (bluetoothPermissionIsGranted()) {
+            JSObject res = new JSObject();
+            res.put("granted", true);
+            call.resolve(res);
+        } else {
+            requestPermissionForAlias(getActivity().getString(R.string.permission_alias), call, "bluetoothPermissionCallback");
+        }
+    }
+
+    @PermissionCallback
+    private void bluetoothPermissionCallback(PluginCall call) {
+        if (bluetoothPermissionIsGranted()) {
+            audioToggle.startBluetoothListener();
+        }
+    }
+
+    private boolean bluetoothPermissionIsGranted() {
+        return getPermissionState(getActivity().getString(R.string.permission_alias)) == PermissionState.GRANTED;
     }
 
     private void unsetAppListeners() {
