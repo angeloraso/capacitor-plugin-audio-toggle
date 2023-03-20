@@ -11,7 +11,9 @@ export interface AudioTogglePlugin {
   getSelectedDevice(): Promise<{selectedDevice: DeviceName}>;
   checkPermissions(): Promise<{granted: boolean}>;
   requestPermissions(): Promise<{granted: boolean}>;
+  isBluetoothEnabled(): Promise<{enabled: boolean}>;
   openBluetoothSettings(): Promise<void>;
+  openAppSettings(): Promise<void>;
 
   addListener(
     eventName: 'onChanges',

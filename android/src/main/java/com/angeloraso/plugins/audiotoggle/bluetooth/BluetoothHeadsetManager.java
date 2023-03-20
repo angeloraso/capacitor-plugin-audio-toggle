@@ -382,6 +382,10 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         }
     }
 
+    public boolean isEnabled() {
+        return bluetoothAdapter.isEnabled();
+    }
+
     private boolean isCorrectIntentAction(String intentAction) {
         return intentAction.equals(ACTION_CONNECTION_STATE_CHANGED) || intentAction.equals(ACTION_AUDIO_STATE_CHANGED);
     }

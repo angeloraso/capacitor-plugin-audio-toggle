@@ -228,6 +228,10 @@ public class AudioToggle {
         }
     }
 
+    public boolean isBluetoothEnabled() {
+        return bluetoothHeadsetManager.isEnabled();
+    }
+
     private List<Class<? extends AudioDevice>> getPreferredDeviceList(List<Class<? extends AudioDevice>> preferredDeviceList) {
         if (!hasNoDuplicates(preferredDeviceList)) {
             throw new IllegalArgumentException("preferredDeviceList has duplicates");

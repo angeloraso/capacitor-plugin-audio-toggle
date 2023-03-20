@@ -1,10 +1,12 @@
 package com.angeloraso.plugins.audiotoggle;
 
+import static android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS;
 import static android.provider.Settings.ACTION_BLUETOOTH_SETTINGS;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PermissionState;
@@ -187,8 +189,24 @@ public class AudioTogglePlugin extends Plugin {
     }
 
     @PluginMethod
+    public void isBluetoothEnabled(PluginCall call) {
+        boolean enabled = audioToggle.isBluetoothEnabled();
+        JSObject res = new JSObject();
+        res.put("enabled", enabled);
+        call.resolve(res);
+    }
+
+    @PluginMethod
     public void openBluetoothSettings(PluginCall call) {
         Intent intent = new Intent(ACTION_BLUETOOTH_SETTINGS);
+        getActivity().startActivity(intent);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void openAppSettings(PluginCall call) {
+        Intent intent = new Intent(ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.setData(Uri.parse("package:" + getActivity().getPackageName()));
         getActivity().startActivity(intent);
         call.resolve();
     }

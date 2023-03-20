@@ -35,8 +35,15 @@ export class AudioToggleWeb extends WebPlugin implements AudioTogglePlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
+  async isBluetoothEnabled(): Promise<{enabled: boolean}> {
+    throw this.unimplemented('Not implemented on web.');
+  }
+
   async openBluetoothSettings(): Promise<void> {
     throw this.unimplemented('Not implemented on web.');
   }
 
+  async openAppSettings(): Promise<void> {
+    throw this.unimplemented('Not implemented on web.');
+  }
 }

@@ -17,8 +17,12 @@ export declare class AudioToggleWeb extends WebPlugin implements AudioTogglePlug
     checkPermissions(): Promise<{
         granted: boolean;
     }>;
+    isBluetoothEnabled(): Promise<{
+        enabled: boolean;
+    }>;
     requestPermissions(): Promise<{
         granted: boolean;
     }>;
     openBluetoothSettings(): Promise<void>;
+    openAppSettings(): Promise<void>;
 }

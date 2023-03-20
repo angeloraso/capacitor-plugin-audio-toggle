@@ -96,6 +96,16 @@
         "slug": "requestpermissions"
       },
       {
+        "name": "isBluetoothEnabled",
+        "signature": "() => Promise<{ enabled: boolean; }>",
+        "parameters": [],
+        "returns": "Promise<{ enabled: boolean; }>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "isbluetoothenabled"
+      },
+      {
         "name": "openBluetoothSettings",
         "signature": "() => Promise<void>",
         "parameters": [],
@@ -104,6 +114,16 @@
         "docs": "",
         "complexTypes": [],
         "slug": "openbluetoothsettings"
+      },
+      {
+        "name": "openAppSettings",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "openappsettings"
       },
       {
         "name": "addListener",
