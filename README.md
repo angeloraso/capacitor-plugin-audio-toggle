@@ -96,10 +96,10 @@ getSelectedDevice() => Promise<{ selectedDevice: DeviceName; }>
 ### checkPermissions()
 
 ```typescript
-checkPermissions() => Promise<PermissionStatus>
+checkPermissions() => Promise<{ granted: boolean; }>
 ```
 
-**Returns:** <code>Promise&lt;any&gt;</code>
+**Returns:** <code>Promise&lt;{ granted: boolean; }&gt;</code>
 
 --------------------
 
@@ -107,10 +107,10 @@ checkPermissions() => Promise<PermissionStatus>
 ### requestPermissions()
 
 ```typescript
-requestPermissions() => Promise<PermissionStatus>
+requestPermissions() => Promise<{ granted: boolean; }>
 ```
 
-**Returns:** <code>Promise&lt;any&gt;</code>
+**Returns:** <code>Promise&lt;{ granted: boolean; }&gt;</code>
 
 --------------------
 

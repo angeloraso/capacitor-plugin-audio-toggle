@@ -27,11 +27,11 @@ export class AudioToggleWeb extends WebPlugin implements AudioTogglePlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  async checkPermissions(): Promise<PermissionStatus> {
+  async checkPermissions(): Promise<{granted: boolean}> {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  async requestPermissions(): Promise<PermissionStatus> {
+  async requestPermissions(): Promise<{granted: boolean}> {
     throw this.unimplemented('Not implemented on web.');
   }
 }

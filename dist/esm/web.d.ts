@@ -14,6 +14,10 @@ export declare class AudioToggleWeb extends WebPlugin implements AudioTogglePlug
     getSelectedDevice(): Promise<{
         selectedDevice: DeviceName;
     }>;
-    checkPermissions(): Promise<PermissionStatus>;
-    requestPermissions(): Promise<PermissionStatus>;
+    checkPermissions(): Promise<{
+        granted: boolean;
+    }>;
+    requestPermissions(): Promise<{
+        granted: boolean;
+    }>;
 }

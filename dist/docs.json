@@ -77,26 +77,22 @@
       },
       {
         "name": "checkPermissions",
-        "signature": "() => Promise<PermissionStatus>",
+        "signature": "() => Promise<{ granted: boolean; }>",
         "parameters": [],
-        "returns": "Promise<any>",
+        "returns": "Promise<{ granted: boolean; }>",
         "tags": [],
         "docs": "",
-        "complexTypes": [
-          "PermissionStatus"
-        ],
+        "complexTypes": [],
         "slug": "checkpermissions"
       },
       {
         "name": "requestPermissions",
-        "signature": "() => Promise<PermissionStatus>",
+        "signature": "() => Promise<{ granted: boolean; }>",
         "parameters": [],
-        "returns": "Promise<any>",
+        "returns": "Promise<{ granted: boolean; }>",
         "tags": [],
         "docs": "",
-        "complexTypes": [
-          "PermissionStatus"
-        ],
+        "complexTypes": [],
         "slug": "requestpermissions"
       },
       {
