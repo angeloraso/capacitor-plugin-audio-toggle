@@ -166,6 +166,7 @@ public class AudioTogglePlugin extends Plugin {
         }
 
         if (bluetoothPermissionIsGranted()) {
+            audioToggle.startBluetoothListener();
             JSObject res = new JSObject();
             res.put("granted", true);
             call.resolve(res);

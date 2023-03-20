@@ -1,6 +1,6 @@
 {
   "name": "capacitor-plugin-audio-toggle",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Capacitor plugin for audio mode toggle",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",

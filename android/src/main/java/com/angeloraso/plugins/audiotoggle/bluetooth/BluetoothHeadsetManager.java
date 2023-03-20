@@ -314,10 +314,9 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
 
     public void start(BluetoothHeadsetConnectionListener headsetListener) {
         if (hasPermissions()) {
-            this.headsetListener = headsetListener;
-
-            bluetoothAdapter.getProfileProxy(context, this, BluetoothProfile.HEADSET);
             if (!hasRegisteredReceivers) {
+                this.headsetListener = headsetListener;
+                bluetoothAdapter.getProfileProxy(context, this, BluetoothProfile.HEADSET);
                 context.registerReceiver(this, new IntentFilter(ACTION_CONNECTION_STATE_CHANGED));
                 context.registerReceiver(this, new IntentFilter(ACTION_AUDIO_STATE_CHANGED));
                 hasRegisteredReceivers = true;
