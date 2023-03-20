@@ -21,6 +21,7 @@ npx cap sync
 * [`getSelectedDevice()`](#getselecteddevice)
 * [`checkPermissions()`](#checkpermissions)
 * [`requestPermissions()`](#requestpermissions)
+* [`openBluetoothSettings()`](#openbluetoothsettings)
 * [`addListener('onChanges', ...)`](#addlisteneronchanges)
 * [`removeAllListeners()`](#removealllisteners)
 * [Interfaces](#interfaces)
@@ -111,6 +112,15 @@ requestPermissions() => Promise<{ granted: boolean; }>
 ```
 
 **Returns:** <code>Promise&lt;{ granted: boolean; }&gt;</code>
+
+--------------------
+
+
+### openBluetoothSettings()
+
+```typescript
+openBluetoothSettings() => Promise<void>
+```
 
 --------------------
 

@@ -22,6 +22,7 @@ export interface AudioTogglePlugin {
     requestPermissions(): Promise<{
         granted: boolean;
     }>;
+    openBluetoothSettings(): Promise<void>;
     addListener(eventName: 'onChanges', listenerFunc: (data: {
         earpiece: boolean;
         speakerphone: boolean;

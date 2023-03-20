@@ -33,6 +33,9 @@ class AudioToggleWeb extends core.WebPlugin {
     async requestPermissions() {
         throw this.unimplemented('Not implemented on web.');
     }
+    async openBluetoothSettings() {
+        throw this.unimplemented('Not implemented on web.');
+    }
 }
 
 var web = /*#__PURE__*/Object.freeze({

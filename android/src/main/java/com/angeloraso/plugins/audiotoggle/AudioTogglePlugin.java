@@ -1,7 +1,10 @@
 package com.angeloraso.plugins.audiotoggle;
 
+import static android.provider.Settings.ACTION_BLUETOOTH_SETTINGS;
+
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PermissionState;
@@ -181,6 +184,13 @@ public class AudioTogglePlugin extends Plugin {
             res.put("granted", false);
             call.resolve(res);
         }
+    }
+
+    @PluginMethod
+    public void openBluetoothSettings(PluginCall call) {
+        Intent intent = new Intent(ACTION_BLUETOOTH_SETTINGS);
+        getActivity().startActivity(intent);
+        call.resolve();
     }
 
     private boolean bluetoothPermissionIsGranted() {

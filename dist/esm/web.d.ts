@@ -20,4 +20,5 @@ export declare class AudioToggleWeb extends WebPlugin implements AudioTogglePlug
     requestPermissions(): Promise<{
         granted: boolean;
     }>;
+    openBluetoothSettings(): Promise<void>;
 }

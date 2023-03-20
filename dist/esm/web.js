@@ -24,5 +24,8 @@ export class AudioToggleWeb extends WebPlugin {
     async requestPermissions() {
         throw this.unimplemented('Not implemented on web.');
     }
+    async openBluetoothSettings() {
+        throw this.unimplemented('Not implemented on web.');
+    }
 }
 //# sourceMappingURL=web.js.map

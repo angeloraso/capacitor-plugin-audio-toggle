@@ -96,6 +96,16 @@
         "slug": "requestpermissions"
       },
       {
+        "name": "openBluetoothSettings",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "openbluetoothsettings"
+      },
+      {
         "name": "addListener",
         "signature": "(eventName: 'onChanges', listenerFunc: (data: { earpiece: boolean; speakerphone: boolean; wired: boolean; bluetooth: boolean; selectedDevice: DeviceName; }) => void) => Promise<PluginListenerHandle> & PluginListenerHandle",
         "parameters": [
