@@ -20,7 +20,10 @@ import java.util.List;
 
 @CapacitorPlugin(
     name = "AudioToggle",
-    permissions = { @Permission(alias = "audio_toggle_bluetooth", strings = { Manifest.permission.BLUETOOTH_CONNECT }) }
+    permissions = {
+        @Permission(alias = "BLUETOOTH", strings = { Manifest.permission.BLUETOOTH }),
+        @Permission(alias = "BLUETOOTH_CONNECT", strings = { Manifest.permission.BLUETOOTH_CONNECT })
+    }
 )
 public class AudioTogglePlugin extends Plugin {
 
@@ -171,7 +174,11 @@ public class AudioTogglePlugin extends Plugin {
             res.put("granted", true);
             call.resolve(res);
         } else {
-            requestPermissionForAlias(getActivity().getString(R.string.permission_alias), call, "bluetoothPermissionCallback");
+            if (Build.VERSION.SDK_INT >= 31) {
+                requestPermissionForAlias(getActivity().getString(R.string.bluetooth_connect_alias), call, "bluetoothPermissionCallback");
+            } else {
+                requestPermissionForAlias(getActivity().getString(R.string.bluetooth_alias), call, "bluetoothPermissionCallback");
+            }
         }
     }
 
@@ -213,7 +220,11 @@ public class AudioTogglePlugin extends Plugin {
     }
 
     private boolean bluetoothPermissionIsGranted() {
-        return getPermissionState(getActivity().getString(R.string.permission_alias)) == PermissionState.GRANTED;
+        if (Build.VERSION.SDK_INT >= 31) {
+            return getPermissionState(getActivity().getString(R.string.bluetooth_connect_alias)) == PermissionState.GRANTED;
+        } else {
+            return getPermissionState(getActivity().getString(R.string.bluetooth_alias)) == PermissionState.GRANTED;
+        }
     }
 
     private void unsetAppListeners() {
