@@ -123,6 +123,17 @@ public class AudioTogglePlugin extends Plugin {
     }
 
     @PluginMethod
+    public void setRingtoneMode(PluginCall call) {
+        if (getActivity().isFinishing()) {
+            call.reject(getActivity().getString(R.string.app_finishing));
+            return;
+        }
+
+        audioToggle.setRingtoneMode();
+        call.resolve();
+    }
+
+    @PluginMethod
     public void selectDevice(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject(getActivity().getString(R.string.app_finishing));

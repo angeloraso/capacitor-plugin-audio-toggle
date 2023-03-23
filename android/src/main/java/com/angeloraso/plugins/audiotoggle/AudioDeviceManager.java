@@ -5,7 +5,6 @@ import android.content.pm.PackageManager;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
-import android.media.AudioManager.OnAudioFocusChangeListener;
 import android.os.Build;
 import com.angeloraso.plugins.audiotoggle.android.BuildWrapper;
 import com.angeloraso.plugins.audiotoggle.android.Logger;
@@ -20,39 +19,17 @@ public class AudioDeviceManager {
     private final Logger logger;
     private final AudioManager audioManager;
     private final BuildWrapper build;
-    private final AudioFocusRequestWrapper audioFocusRequest;
-    private final OnAudioFocusChangeListener audioFocusChangeListener;
-
-    private int savedAudioMode = 0;
-    private boolean savedIsMicrophoneMuted = false;
-    private boolean savedSpeakerphoneEnabled = false;
-    private AudioFocusRequest audioRequest = null;
-
     private final Pattern samsungPattern = Pattern.compile("^SM-G(960|99)");
 
-    public AudioDeviceManager(
-        Context context,
-        Logger logger,
-        AudioManager audioManager,
-        OnAudioFocusChangeListener audioFocusChangeListener
-    ) {
-        this(context, logger, audioManager, new BuildWrapper(), new AudioFocusRequestWrapper(), audioFocusChangeListener);
+    public AudioDeviceManager(Context context, Logger logger, AudioManager audioManager) {
+        this(context, logger, audioManager, new BuildWrapper());
     }
 
-    public AudioDeviceManager(
-        Context context,
-        Logger logger,
-        AudioManager audioManager,
-        BuildWrapper build,
-        AudioFocusRequestWrapper audioFocusRequest,
-        OnAudioFocusChangeListener audioFocusChangeListener
-    ) {
+    public AudioDeviceManager(Context context, Logger logger, AudioManager audioManager, BuildWrapper build) {
         this.context = context;
         this.logger = logger;
         this.audioManager = audioManager;
         this.build = build;
-        this.audioFocusRequest = audioFocusRequest;
-        this.audioFocusChangeListener = audioFocusChangeListener;
     }
 
     public boolean hasEarpiece() {
@@ -76,10 +53,7 @@ public class AudioDeviceManager {
 
     public void setAudioFocus() {
         // Request audio focus before making any device switch.
-        audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener);
-        if (audioRequest != null) {
-            audioManager.requestAudioFocus(audioRequest);
-        }
+        new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).build();
     }
 
     public void enableBluetoothSco(boolean enable) {
@@ -93,21 +67,28 @@ public class AudioDeviceManager {
         } else {
             if (enable) {
                 audioManager.startBluetoothSco();
+                audioManager.setBluetoothScoOn(true);
             } else {
                 audioManager.stopBluetoothSco();
+                audioManager.setBluetoothScoOn(false);
             }
         }
     }
 
     public void enableSpeakerphone() {
+        if (audioManager.isBluetoothScoOn()) {
+            enableBluetoothSco(false);
+            audioManager.setMode(AudioManager.MODE_NORMAL);
+            audioManager.setSpeakerphoneOn(true);
+        }
+
+        audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
+        audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
+
         if (isAndroid12OrNewer()) {
-            audioManager.clearCommunicationDevice();
             AudioDeviceInfo speakerDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
             boolean success = audioManager.setCommunicationDevice(speakerDevice);
-            if (success) {
-                audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
-                audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
-            } else {
+            if (!success) {
                 logger.d(TAG, "Speakerphone error");
             }
         } else {
@@ -123,33 +104,29 @@ public class AudioDeviceManager {
         }
     }
 
-    public void disableSpeakerphone() {
-        if (!isAndroid12OrNewer()) {
-            audioManager.setSpeakerphoneOn(false);
-        }
-    }
-
     public void enableEarpiece() {
+        audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
+        audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
         if (isAndroid12OrNewer()) {
+            audioManager.setMode(AudioManager.MODE_NORMAL);
             audioManager.clearCommunicationDevice();
             AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
             boolean success = audioManager.setCommunicationDevice(earpieceDevice);
-            if (success) {
-                audioManager.setMode(AudioManager.MODE_NORMAL);
-                audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
-                audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
-            } else {
+            if (!success) {
                 logger.d(TAG, "Earpiece error");
             }
         } else {
             audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-            disableSpeakerphone();
+            audioManager.setSpeakerphoneOn(false);
         }
     }
 
     public void enableWired() {
+        audioManager.setMode(AudioManager.MODE_NORMAL);
+        audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+        audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+
         if (isAndroid12OrNewer()) {
-            audioManager.clearCommunicationDevice();
             AudioDeviceInfo wiredHeadsetDevice = getAudioDevice(AudioDeviceInfo.TYPE_WIRED_HEADSET);
             AudioDeviceInfo wiredHeadphonesDevice = getAudioDevice(AudioDeviceInfo.TYPE_WIRED_HEADPHONES);
             boolean success;
@@ -158,11 +135,7 @@ public class AudioDeviceManager {
             } else {
                 success = audioManager.setCommunicationDevice(wiredHeadphonesDevice);
             }
-            if (success) {
-                audioManager.setMode(AudioManager.MODE_NORMAL);
-                audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
-                audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
-            } else {
+            if (!success) {
                 logger.d(TAG, "Earpiece error");
             }
         } else {
@@ -170,31 +143,19 @@ public class AudioDeviceManager {
         }
     }
 
+    public void enableRingtoneMode() {
+        audioManager.setMode(AudioManager.MODE_RINGTONE);
+        audioManager.setSpeakerphoneOn(false);
+    }
+
+    public void reset() {
+        audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+        audioManager.setMode(AudioManager.MODE_NORMAL);
+        audioManager.setSpeakerphoneOn(false);
+    }
+
     public void mute(boolean mute) {
         audioManager.setMicrophoneMute(mute);
-    }
-
-    // TODO Consider persisting audio state in the event of process death
-    public void cacheAudioState() {
-        savedAudioMode = audioManager.getMode();
-        savedIsMicrophoneMuted = audioManager.isMicrophoneMute();
-        savedSpeakerphoneEnabled = audioManager.isSpeakerphoneOn();
-    }
-
-    public void restoreAudioState() {
-        if (isAndroid12OrNewer()) {
-            audioManager.clearCommunicationDevice();
-        }
-        audioManager.setMode(savedAudioMode);
-        mute(savedIsMicrophoneMuted);
-        if (savedSpeakerphoneEnabled) {
-            enableSpeakerphone();
-        } else {
-            disableSpeakerphone();
-        }
-        if (audioRequest != null) {
-            audioManager.abandonAudioFocusRequest(audioRequest);
-        }
     }
 
     private boolean isAndroid12OrNewer() {

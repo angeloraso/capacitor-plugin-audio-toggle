@@ -101,7 +101,7 @@ public class AudioToggle {
         this.logger = new ProductionLogger(log);
 
         this.audioDeviceManager =
-            new AudioDeviceManager(context, this.logger, (AudioManager) context.getSystemService(Context.AUDIO_SERVICE), focusChange -> {});
+            new AudioDeviceManager(context, this.logger, (AudioManager) context.getSystemService(Context.AUDIO_SERVICE));
         this.wiredHeadsetReceiver = new WiredHeadsetReceiver(context, this.logger);
         this.bluetoothHeadsetManager =
             BluetoothHeadsetManager.newInstance(context, logger, BluetoothAdapter.getDefaultAdapter(), audioDeviceManager);
@@ -157,15 +157,11 @@ public class AudioToggle {
     public void activate() {
         switch (state) {
             case STARTED:
-                audioDeviceManager.cacheAudioState();
-                enumerateDevices();
                 state = State.ACTIVATED;
                 // Always set mute to false for WebRTC
                 audioDeviceManager.mute(false);
                 audioDeviceManager.setAudioFocus();
-                if (userSelectedDevice != null) {
-                    activate(userSelectedDevice);
-                }
+                enumerateDevices();
                 break;
             case ACTIVATED:
                 if (selectedDevice != null) {
@@ -185,8 +181,7 @@ public class AudioToggle {
                     bluetoothHeadsetManager.deactivate();
                 }
 
-                // Restore stored audio state
-                audioDeviceManager.restoreAudioState();
+                audioDeviceManager.reset();
                 break;
             case STARTED:
             case STOPPED:
@@ -245,29 +240,30 @@ public class AudioToggle {
             .noneMatch(entry -> entry.getValue() > 1);
     }
 
+    public void setRingtoneMode() {
+        audioDeviceManager.enableRingtoneMode();
+    }
+
     private void activate(AudioDevice audioDevice) {
         if (audioDevice instanceof BluetoothHeadset) {
-            audioDeviceManager.disableSpeakerphone();
             if (bluetoothHeadsetManager != null) {
                 bluetoothHeadsetManager.activate();
             }
         } else if (audioDevice instanceof Earpiece) {
-            audioDeviceManager.disableSpeakerphone();
+            if (bluetoothHeadsetManager != null) {
+                bluetoothHeadsetManager.deactivate();
+            }
             audioDeviceManager.enableEarpiece();
-            if (bluetoothHeadsetManager != null) {
-                bluetoothHeadsetManager.deactivate();
-            }
         } else if (audioDevice instanceof WiredHeadset) {
-            audioDeviceManager.disableSpeakerphone();
+            if (bluetoothHeadsetManager != null) {
+                bluetoothHeadsetManager.deactivate();
+            }
             audioDeviceManager.enableWired();
-            if (bluetoothHeadsetManager != null) {
-                bluetoothHeadsetManager.deactivate();
-            }
         } else if (audioDevice instanceof Speakerphone) {
-            audioDeviceManager.enableSpeakerphone();
             if (bluetoothHeadsetManager != null) {
                 bluetoothHeadsetManager.deactivate();
             }
+            audioDeviceManager.enableSpeakerphone();
         }
     }
 
