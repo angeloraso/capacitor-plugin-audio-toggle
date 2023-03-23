@@ -49,15 +49,25 @@ public class AudioToggle {
         public void onBluetoothHeadsetStateChanged(String headsetName) {
             if (!Objects.equals(bluetoothHeadsetConnected, headsetName)) {
                 bluetoothHeadsetConnected = headsetName;
+                if (headsetName != null) {
+                    userSelectedDevice = new BluetoothHeadset();
+                }
                 enumerateDevices();
             }
         }
 
         @Override
-        public void onBluetoothHeadsetActivationError() {
-            if (userSelectedDevice instanceof BluetoothHeadset) {
-                userSelectedDevice = null;
+        public void onBluetoothConnected(boolean connected) {
+            if (state == State.ACTIVATED) {
+                if (connected) {
+                    userSelectedDevice = new BluetoothHeadset();
+                }
             }
+            enumerateDevices();
+        }
+
+        @Override
+        public void onBluetoothHeadsetActivationError() {
             enumerateDevices();
         }
     };
@@ -125,22 +135,10 @@ public class AudioToggle {
         wiredHeadsetReceiver.start(wiredDeviceConnectionListener);
     }
 
-    /**
-     * Starts listening for audio device changes and calls the provided listener upon each change.
-     * Note that when audio device listening is no longer needed, AudioToggle.stop() should be called
-     * in order to prevent a memory leak.
-     *
-     * @param listener the listener to call upon each audio device change
-     */
     public void setAudioToggleEventListener(AudioDeviceChangeListener listener) {
         audioDeviceChangeListener = listener;
     }
 
-    /**
-     * Stops listening for audio device changes if AudioToggle.start() has already been invoked.
-     * AudioToggle.deactivate() will also get called if a device has been activated with
-     * AudioToggle.activate().
-     */
     public void stop() {
         switch (state) {
             case ACTIVATED:
@@ -156,12 +154,6 @@ public class AudioToggle {
         }
     }
 
-    /**
-     * Performs audio routing and unmuting on the selected device from
-     * [AudioToggle.selectDevice]. Audio focus is also acquired for the client application.
-     * **Note:** [AudioToggle.deactivate] should be invoked to restore the prior audio
-     * state.
-     */
     public void activate() {
         switch (state) {
             case STARTED:
@@ -185,10 +177,6 @@ public class AudioToggle {
         }
     }
 
-    /**
-     * Restores the audio state prior to calling [AudioToggle.activate] and removes
-     * audio focus from the client application.
-     */
     public void deactivate() {
         switch (state) {
             case ACTIVATED:
@@ -206,12 +194,6 @@ public class AudioToggle {
         }
     }
 
-    /**
-     * Selects the desired [audioDevice]. If the provided [AudioDevice] is not
-     * available, no changes are made. If the provided device is null, one is chosen based on the
-     * specified preferred device list or the following default list:
-     * [bluetooth], [wired], [earpiece], [speakerphone].
-     */
     public void selectDevice(String deviceName) {
         AudioDevice audioDevice;
 
@@ -303,8 +285,10 @@ public class AudioToggle {
     private void enumerateDevices() {
         // save off the old state and 'semi'-deep copy the list of audio devices
         AudioDeviceState oldAudioDeviceState = new AudioDeviceState(new ArrayList<>(mutableAudioDevices), selectedDevice);
+        mutableAudioDevices.clear();
+
         // update audio device list and selected device
-        addAvailableAudioDevices();
+        mutableAudioDevices = getAvailableAudioDevices();
 
         if (!userSelectedDevicePresent(mutableAudioDevices)) {
             userSelectedDevice = null;
@@ -347,30 +331,31 @@ public class AudioToggle {
         }
     }
 
-    private void addAvailableAudioDevices() {
-        mutableAudioDevices.clear();
+    private ArrayList<AudioDevice> getAvailableAudioDevices() {
+        ArrayList<AudioDevice> devices = new ArrayList<>();
         for (Class<? extends AudioDevice> audioDevice : preferredDeviceList) {
             if (audioDevice.equals(BluetoothHeadset.class)) {
                 BluetoothHeadset bluetoothHeadset = bluetoothHeadsetManager != null ? bluetoothHeadsetManager.getHeadset() : null;
                 if (bluetoothHeadset != null) {
-                    mutableAudioDevices.add(bluetoothHeadset);
+                    devices.add(bluetoothHeadset);
                 }
             } else if (audioDevice.equals(WiredHeadset.class)) {
                 if (wiredHeadsetAvailable) {
-                    mutableAudioDevices.add(new WiredHeadset());
+                    devices.add(new WiredHeadset());
                 }
             } else if (audioDevice.equals(Earpiece.class)) {
                 if (audioDeviceManager.hasEarpiece() && !wiredHeadsetAvailable) {
-                    mutableAudioDevices.add(new Earpiece());
+                    devices.add(new Earpiece());
                 }
             } else if (audioDevice.equals(Speakerphone.class)) {
                 if (audioDeviceManager.hasSpeakerphone()) {
-                    mutableAudioDevices.add(new Speakerphone());
+                    devices.add(new Speakerphone());
                 }
             }
         }
 
-        logger.d(TAG, "Available AudioDevice list updated: " + availableAudioDevices);
+        logger.d(TAG, "Available AudioDevice list updated: " + devices);
+        return devices;
     }
 
     private boolean userSelectedDevicePresent(List<AudioDevice> audioDevices) {

@@ -136,7 +136,7 @@ public class AudioDeviceManager {
             boolean success = audioManager.setCommunicationDevice(earpieceDevice);
             if (success) {
                 audioManager.setMode(AudioManager.MODE_NORMAL);
-                audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
+                audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
                 audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
             } else {
                 logger.d(TAG, "Earpiece error");

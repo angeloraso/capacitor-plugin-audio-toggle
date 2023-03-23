@@ -231,15 +231,9 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         }
     }
 
-    @SuppressLint("MissingPermission")
     @Override
     public void onServiceConnected(int profile, BluetoothProfile bluetoothProfile) {
         headsetProxy = (BluetoothHeadset) bluetoothProfile;
-        if (hasPermissions()) {
-            for (BluetoothDevice device : bluetoothProfile.getConnectedDevices()) {
-                logger.d(TAG, "Bluetooth " + device.getName() + " connected");
-            }
-        }
         if (hasConnectedDevice()) {
             connect();
             if (headsetListener != null) {
@@ -272,14 +266,14 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
                         this.logger.d(TAG, "Bluetooth headset " + bluetoothDevice.getName() + " connected");
                         connect();
                         if (headsetListener != null) {
-                            headsetListener.onBluetoothHeadsetStateChanged(bluetoothDevice.getName());
+                            headsetListener.onBluetoothConnected(true);
                         }
                         break;
                     case STATE_DISCONNECTED:
                         this.logger.d(TAG, "Bluetooth headset " + bluetoothDevice.getName() + " disconnected");
                         disconnect();
                         if (headsetListener != null) {
-                            headsetListener.onBluetoothHeadsetStateChanged(null);
+                            headsetListener.onBluetoothConnected(false);
                         }
                         break;
                     case STATE_AUDIO_CONNECTED:
