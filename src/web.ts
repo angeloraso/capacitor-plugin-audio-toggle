@@ -7,6 +7,10 @@ export class AudioToggleWeb extends WebPlugin implements AudioTogglePlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
+  async setRingtoneMode(): Promise<void> {
+    throw this.unimplemented('Not implemented on web.');
+  }
+
   async enable(): Promise<void>{
     throw this.unimplemented('Not implemented on web.');
   }

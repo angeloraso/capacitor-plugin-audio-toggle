@@ -17,6 +17,7 @@ npx cap sync
 * [`disable()`](#disable)
 * [`reset()`](#reset)
 * [`selectDevice(...)`](#selectdevice)
+* [`setRingtoneMode()`](#setringtonemode)
 * [`getAvailableDevices()`](#getavailabledevices)
 * [`getSelectedDevice()`](#getselecteddevice)
 * [`checkPermissions()`](#checkpermissions)
@@ -70,6 +71,15 @@ selectDevice(data: { device: DeviceName; }) => Promise<void>
 | Param      | Type                                                           |
 | ---------- | -------------------------------------------------------------- |
 | **`data`** | <code>{ device: <a href="#devicename">DeviceName</a>; }</code> |
+
+--------------------
+
+
+### setRingtoneMode()
+
+```typescript
+setRingtoneMode() => Promise<void>
+```
 
 --------------------
 

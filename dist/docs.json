@@ -54,6 +54,16 @@
         "slug": "selectdevice"
       },
       {
+        "name": "setRingtoneMode",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "setringtonemode"
+      },
+      {
         "name": "getAvailableDevices",
         "signature": "() => Promise<{ earpiece: boolean; speakerphone: boolean; wired: boolean; bluetooth: boolean; }>",
         "parameters": [],
