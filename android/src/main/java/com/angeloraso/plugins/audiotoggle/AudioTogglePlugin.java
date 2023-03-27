@@ -34,7 +34,7 @@ public class AudioTogglePlugin extends Plugin {
         audioToggle = new AudioToggle(context, true);
     }
 
-    @PluginMethod
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
     public void enable(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject(getActivity().getString(R.string.app_finishing));
@@ -46,6 +46,7 @@ public class AudioTogglePlugin extends Plugin {
             requestPermissions(call);
         }
         audioToggle.start();
+        call.resolve();
     }
 
     private void onAudioToggleEvent(List<AudioDevice> audioDevices, AudioDevice audioDevice) {
@@ -66,7 +67,7 @@ public class AudioTogglePlugin extends Plugin {
         notifyListeners("onChanges", res);
     }
 
-    @PluginMethod
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
     public void disable(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject(getActivity().getString(R.string.app_finishing));
@@ -77,7 +78,7 @@ public class AudioTogglePlugin extends Plugin {
         call.resolve();
     }
 
-    @PluginMethod
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
     public void reset(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject(getActivity().getString(R.string.app_finishing));
@@ -122,7 +123,7 @@ public class AudioTogglePlugin extends Plugin {
         call.resolve(res);
     }
 
-    @PluginMethod
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
     public void setRingtoneMode(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject(getActivity().getString(R.string.app_finishing));
@@ -156,6 +157,7 @@ public class AudioTogglePlugin extends Plugin {
         super.removeAllListeners(call);
         audioToggle.deactivate();
         unsetAppListeners();
+        call.resolve();
     }
 
     @PluginMethod
@@ -215,14 +217,14 @@ public class AudioTogglePlugin extends Plugin {
         call.resolve(res);
     }
 
-    @PluginMethod
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
     public void openBluetoothSettings(PluginCall call) {
         Intent intent = new Intent(ACTION_BLUETOOTH_SETTINGS);
         getActivity().startActivity(intent);
         call.resolve();
     }
 
-    @PluginMethod
+    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
     public void openAppSettings(PluginCall call) {
         Intent intent = new Intent(ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.setData(Uri.parse("package:" + getActivity().getPackageName()));
