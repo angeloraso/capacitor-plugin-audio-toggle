@@ -3,6 +3,7 @@ package com.angeloraso.plugins.audiotoggle;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.media.AudioManager;
+import androidx.appcompat.app.AppCompatActivity;
 import com.angeloraso.plugins.audiotoggle.AudioDevice.BluetoothHeadset;
 import com.angeloraso.plugins.audiotoggle.AudioDevice.Earpiece;
 import com.angeloraso.plugins.audiotoggle.AudioDevice.Speakerphone;
@@ -97,11 +98,11 @@ public class AudioToggle {
     AudioDevice selectedAudioDevice = selectedDevice;
     List<AudioDevice> availableAudioDevices = mutableAudioDevices;
 
-    public AudioToggle(final Context context, boolean log) {
+    public AudioToggle(final AppCompatActivity activityCompat, final Context context, boolean log) {
         this.logger = new ProductionLogger(log);
 
         this.audioDeviceManager =
-            new AudioDeviceManager(context, this.logger, (AudioManager) context.getSystemService(Context.AUDIO_SERVICE));
+            new AudioDeviceManager(activityCompat, context, this.logger, (AudioManager) context.getSystemService(Context.AUDIO_SERVICE));
         this.wiredHeadsetReceiver = new WiredHeadsetReceiver(context, this.logger);
         this.bluetoothHeadsetManager =
             BluetoothHeadsetManager.newInstance(context, logger, BluetoothAdapter.getDefaultAdapter(), audioDeviceManager);

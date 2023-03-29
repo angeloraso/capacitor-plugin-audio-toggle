@@ -1,11 +1,14 @@
 package com.angeloraso.plugins.audiotoggle;
 
+import static android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioDeviceInfo;
 import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Build;
+import androidx.appcompat.app.AppCompatActivity;
 import com.angeloraso.plugins.audiotoggle.android.BuildWrapper;
 import com.angeloraso.plugins.audiotoggle.android.Logger;
 import java.util.List;
@@ -16,20 +19,54 @@ public class AudioDeviceManager {
     private static final String TAG = "AudioDeviceManager";
 
     private final Context context;
+
+    private final AppCompatActivity appCompatActivity;
     private final Logger logger;
     private final AudioManager audioManager;
     private final BuildWrapper build;
     private final Pattern samsungPattern = Pattern.compile("^SM-G(960|99)");
 
-    public AudioDeviceManager(Context context, Logger logger, AudioManager audioManager) {
-        this(context, logger, audioManager, new BuildWrapper());
+    private AudioFocusRequest audioRequest = null;
+    private AudioFocusRequestWrapper audioFocusRequest = new AudioFocusRequestWrapper();
+    private AudioManager.OnAudioFocusChangeListener audioFocusChangeListener;
+
+    private int savedAudioMode = 0;
+    private boolean savedIsMicrophoneMuted = false;
+    private boolean savedSpeakerphoneEnabled = false;
+
+    public AudioDeviceManager(AppCompatActivity appCompatActivity, Context context, Logger logger, AudioManager audioManager) {
+        this(appCompatActivity, context, logger, audioManager, new BuildWrapper());
     }
 
-    public AudioDeviceManager(Context context, Logger logger, AudioManager audioManager, BuildWrapper build) {
+    public AudioDeviceManager(
+        AppCompatActivity appCompatActivity,
+        Context context,
+        Logger logger,
+        AudioManager audioManager,
+        BuildWrapper build
+    ) {
+        this.appCompatActivity = appCompatActivity;
         this.context = context;
         this.logger = logger;
         this.audioManager = audioManager;
         this.build = build;
+        this.audioFocusChangeListener =
+            focusChange -> {
+                switch (focusChange) {
+                    case AudioManager.AUDIOFOCUS_GAIN:
+                        logger.d(TAG, "AUDIO FOCUS GAIN");
+                        break;
+                    case AudioManager.AUDIOFOCUS_LOSS:
+                        logger.d(TAG, "AUDIO FOCUS LOSS");
+                        break;
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                        logger.d(TAG, "AUDIO FOCUS LOSS TRANSIENT");
+                        break;
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                        logger.d(TAG, "AUDIO FOCUS LOSS TRANSIENT CAN DUCK");
+                        break;
+                }
+            };
     }
 
     public boolean hasEarpiece() {
@@ -52,8 +89,19 @@ public class AudioDeviceManager {
     }
 
     public void setAudioFocus() {
-        // Request audio focus before making any device switch.
-        new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).build();
+        audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener);
+        if (audioRequest != null) {
+            int res = audioManager.requestAudioFocus(audioRequest);
+            if (res == AUDIOFOCUS_REQUEST_GRANTED) {
+                cacheAudioState();
+                if (isAndroid12OrNewer()) {
+                    audioManager.clearCommunicationDevice();
+                }
+
+                appCompatActivity.setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            }
+        }
     }
 
     public void enableBluetoothSco(boolean enable) {
@@ -78,23 +126,14 @@ public class AudioDeviceManager {
     public void enableSpeakerphone() {
         if (audioManager.isBluetoothScoOn()) {
             enableBluetoothSco(false);
-            audioManager.setMode(AudioManager.MODE_NORMAL);
-            audioManager.setSpeakerphoneOn(true);
         }
-
-        audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
-        audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
 
         if (isAndroid12OrNewer()) {
-            AudioDeviceInfo speakerDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
-            boolean success = audioManager.setCommunicationDevice(speakerDevice);
-            if (!success) {
-                logger.d(TAG, "Speakerphone error");
-            }
-        } else {
-            audioManager.setMode(AudioManager.MODE_NORMAL);
-            audioManager.setSpeakerphoneOn(true);
+            audioManager.clearCommunicationDevice();
         }
+
+        audioManager.setSpeakerphoneOn(true);
+        audioManager.setMode(AudioManager.MODE_NORMAL);
 
         if (!audioManager.isSpeakerphoneOn() && samsungPattern.matcher(Build.MODEL).find()) {
             AudioDeviceInfo usbDevice = getAudioDevice(AudioDeviceInfo.TYPE_USB_HEADSET);
@@ -105,10 +144,7 @@ public class AudioDeviceManager {
     }
 
     public void enableEarpiece() {
-        audioManager.adjustVolume(AudioManager.ADJUST_RAISE, AudioManager.FLAG_PLAY_SOUND);
-        audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
         if (isAndroid12OrNewer()) {
-            audioManager.setMode(AudioManager.MODE_NORMAL);
             audioManager.clearCommunicationDevice();
             AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
             boolean success = audioManager.setCommunicationDevice(earpieceDevice);
@@ -116,17 +152,13 @@ public class AudioDeviceManager {
                 logger.d(TAG, "Earpiece error");
             }
         } else {
-            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             audioManager.setSpeakerphoneOn(false);
         }
     }
 
     public void enableWired() {
-        audioManager.setMode(AudioManager.MODE_NORMAL);
-        audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
-        audioManager.adjustStreamVolume(AudioManager.STREAM_VOICE_CALL, AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
-
         if (isAndroid12OrNewer()) {
+            audioManager.setMode(AudioManager.MODE_NORMAL);
             AudioDeviceInfo wiredHeadsetDevice = getAudioDevice(AudioDeviceInfo.TYPE_WIRED_HEADSET);
             AudioDeviceInfo wiredHeadphonesDevice = getAudioDevice(AudioDeviceInfo.TYPE_WIRED_HEADPHONES);
             boolean success;
@@ -145,13 +177,18 @@ public class AudioDeviceManager {
 
     public void enableRingtoneMode() {
         audioManager.setMode(AudioManager.MODE_RINGTONE);
+        appCompatActivity.setVolumeControlStream(AudioManager.STREAM_RING);
         audioManager.setSpeakerphoneOn(false);
     }
 
     public void reset() {
-        audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
-        audioManager.setMode(AudioManager.MODE_NORMAL);
-        audioManager.setSpeakerphoneOn(false);
+        if (audioRequest != null) {
+            audioManager.abandonAudioFocusRequest(audioRequest);
+        }
+
+        appCompatActivity.setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
+
+        restoreAudioState();
     }
 
     public void mute(boolean mute) {
@@ -160,6 +197,18 @@ public class AudioDeviceManager {
 
     private boolean isAndroid12OrNewer() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
+    }
+
+    private void cacheAudioState() {
+        savedAudioMode = audioManager.getMode();
+        savedIsMicrophoneMuted = audioManager.isMicrophoneMute();
+        savedSpeakerphoneEnabled = audioManager.isSpeakerphoneOn();
+    }
+
+    private void restoreAudioState() {
+        audioManager.setMode(savedAudioMode);
+        mute(savedIsMicrophoneMuted);
+        audioManager.setSpeakerphoneOn(savedSpeakerphoneEnabled);
     }
 
     private AudioDeviceInfo getAudioDevice(Integer type) {

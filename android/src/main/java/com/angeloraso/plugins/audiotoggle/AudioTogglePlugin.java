@@ -6,8 +6,11 @@ import static android.provider.Settings.ACTION_BLUETOOTH_SETTINGS;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
@@ -31,10 +34,11 @@ public class AudioTogglePlugin extends Plugin {
 
     public void load() {
         Context context = getContext();
-        audioToggle = new AudioToggle(context, true);
+        AppCompatActivity activityCompat = getActivity();
+        audioToggle = new AudioToggle(activityCompat, context, true);
     }
 
-    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    @PluginMethod
     public void enable(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject(getActivity().getString(R.string.app_finishing));
@@ -67,7 +71,7 @@ public class AudioTogglePlugin extends Plugin {
         notifyListeners("onChanges", res);
     }
 
-    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    @PluginMethod
     public void disable(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject(getActivity().getString(R.string.app_finishing));
@@ -78,7 +82,7 @@ public class AudioTogglePlugin extends Plugin {
         call.resolve();
     }
 
-    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    @PluginMethod
     public void reset(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject(getActivity().getString(R.string.app_finishing));
@@ -123,7 +127,7 @@ public class AudioTogglePlugin extends Plugin {
         call.resolve(res);
     }
 
-    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    @PluginMethod
     public void setRingtoneMode(PluginCall call) {
         if (getActivity().isFinishing()) {
             call.reject(getActivity().getString(R.string.app_finishing));
@@ -155,9 +159,8 @@ public class AudioTogglePlugin extends Plugin {
     @PluginMethod(returnType = PluginMethod.RETURN_NONE)
     public void removeAllListeners(PluginCall call) {
         super.removeAllListeners(call);
-        audioToggle.deactivate();
+        audioToggle.stop();
         unsetAppListeners();
-        call.resolve();
     }
 
     @PluginMethod
@@ -217,14 +220,14 @@ public class AudioTogglePlugin extends Plugin {
         call.resolve(res);
     }
 
-    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    @PluginMethod
     public void openBluetoothSettings(PluginCall call) {
         Intent intent = new Intent(ACTION_BLUETOOTH_SETTINGS);
         getActivity().startActivity(intent);
         call.resolve();
     }
 
-    @PluginMethod(returnType = PluginMethod.RETURN_NONE)
+    @PluginMethod
     public void openAppSettings(PluginCall call) {
         Intent intent = new Intent(ACTION_APPLICATION_DETAILS_SETTINGS);
         intent.setData(Uri.parse("package:" + getActivity().getPackageName()));
