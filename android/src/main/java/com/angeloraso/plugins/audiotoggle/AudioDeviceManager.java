@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.angeloraso.plugins.audiotoggle.android.BuildWrapper;
 import com.angeloraso.plugins.audiotoggle.android.Logger;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class AudioDeviceManager {
 
@@ -24,15 +23,9 @@ public class AudioDeviceManager {
     private final Logger logger;
     private final AudioManager audioManager;
     private final BuildWrapper build;
-    private final Pattern samsungPattern = Pattern.compile("^SM-G(960|99)");
-
     private AudioFocusRequest audioRequest = null;
     private AudioFocusRequestWrapper audioFocusRequest = new AudioFocusRequestWrapper();
     private AudioManager.OnAudioFocusChangeListener audioFocusChangeListener;
-
-    private int savedAudioMode = 0;
-    private boolean savedIsMicrophoneMuted = false;
-    private boolean savedSpeakerphoneEnabled = false;
 
     public AudioDeviceManager(AppCompatActivity appCompatActivity, Context context, Logger logger, AudioManager audioManager) {
         this(appCompatActivity, context, logger, audioManager, new BuildWrapper());
@@ -89,18 +82,27 @@ public class AudioDeviceManager {
     }
 
     public void setAudioFocus() {
-        audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener);
-        if (audioRequest != null) {
-            int res = audioManager.requestAudioFocus(audioRequest);
-            if (res == AUDIOFOCUS_REQUEST_GRANTED) {
-                cacheAudioState();
-                if (isAndroid12OrNewer()) {
-                    audioManager.clearCommunicationDevice();
-                }
-
-                appCompatActivity.setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        try {
+            // Delay for Android 10/11
+            if (!isAndroid12OrNewer()) {
+                Thread.sleep(1000);
             }
+
+            audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener);
+            if (audioRequest != null) {
+                int res = audioManager.requestAudioFocus(audioRequest);
+                if (res == AUDIOFOCUS_REQUEST_GRANTED) {
+                    if (isAndroid12OrNewer()) {
+                        audioManager.clearCommunicationDevice();
+                    }
+
+                    appCompatActivity.setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
+                    audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                }
+            }
+        } catch (InterruptedException e) {
+            logger.d(TAG, "Set focus error");
+            e.printStackTrace();
         }
     }
 
@@ -130,22 +132,15 @@ public class AudioDeviceManager {
 
         if (isAndroid12OrNewer()) {
             audioManager.clearCommunicationDevice();
+        } else {
+            audioManager.setSpeakerphoneOn(true);
         }
 
-        audioManager.setSpeakerphoneOn(true);
         audioManager.setMode(AudioManager.MODE_NORMAL);
-
-        if (!audioManager.isSpeakerphoneOn() && samsungPattern.matcher(Build.MODEL).find()) {
-            AudioDeviceInfo usbDevice = getAudioDevice(AudioDeviceInfo.TYPE_USB_HEADSET);
-            if (usbDevice != null) {
-                audioManager.setMode(AudioManager.MODE_NORMAL);
-            }
-        }
     }
 
     public void enableEarpiece() {
         if (isAndroid12OrNewer()) {
-            audioManager.clearCommunicationDevice();
             AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
             boolean success = audioManager.setCommunicationDevice(earpieceDevice);
             if (!success) {
@@ -182,13 +177,15 @@ public class AudioDeviceManager {
     }
 
     public void reset() {
-        if (audioRequest != null) {
-            audioManager.abandonAudioFocusRequest(audioRequest);
-        }
-
         appCompatActivity.setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
-
-        restoreAudioState();
+        audioManager.setMode(AudioManager.MODE_NORMAL);
+        audioManager.setSpeakerphoneOn(true);
+        if (audioRequest != null) {
+            int res = audioManager.abandonAudioFocusRequest(audioRequest);
+            if (res != AUDIOFOCUS_REQUEST_GRANTED) {
+                logger.d(TAG, "Abandon audio focus request error");
+            }
+        }
     }
 
     public void mute(boolean mute) {
@@ -197,18 +194,6 @@ public class AudioDeviceManager {
 
     private boolean isAndroid12OrNewer() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
-    }
-
-    private void cacheAudioState() {
-        savedAudioMode = audioManager.getMode();
-        savedIsMicrophoneMuted = audioManager.isMicrophoneMute();
-        savedSpeakerphoneEnabled = audioManager.isSpeakerphoneOn();
-    }
-
-    private void restoreAudioState() {
-        audioManager.setMode(savedAudioMode);
-        mute(savedIsMicrophoneMuted);
-        audioManager.setSpeakerphoneOn(savedSpeakerphoneEnabled);
     }
 
     private AudioDeviceInfo getAudioDevice(Integer type) {
