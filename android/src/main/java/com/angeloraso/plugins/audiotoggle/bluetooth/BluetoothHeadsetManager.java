@@ -12,11 +12,13 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import com.angeloraso.plugins.audiotoggle.AudioDevice;
@@ -50,156 +52,24 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
     private static final String TAG = "BluetoothHeadsetManager";
     private static final String PERMISSION_ERROR_MESSAGE = "Bluetooth unsupported, permissions not granted";
 
-    public BluetoothHeadsetManager(
-        Context context,
-        Logger logger,
-        BluetoothAdapter bluetoothAdapter,
-        AudioDeviceManager audioDeviceManager
-    ) {
-        this(context, logger, bluetoothAdapter, audioDeviceManager, null);
-    }
-
-    public BluetoothHeadsetManager(
-        Context context,
-        Logger logger,
-        BluetoothAdapter bluetoothAdapter,
-        AudioDeviceManager audioDeviceManager,
-        BluetoothHeadsetConnectionListener headsetListener
-    ) {
-        this(context, logger, bluetoothAdapter, audioDeviceManager, headsetListener, new Handler(Looper.getMainLooper()));
-    }
-
-    public BluetoothHeadsetManager(
-        Context context,
-        Logger logger,
-        BluetoothAdapter bluetoothAdapter,
-        AudioDeviceManager audioDeviceManager,
-        BluetoothHeadsetConnectionListener headsetListener,
-        Handler bluetoothScoHandler
-    ) {
-        this(context, logger, bluetoothAdapter, audioDeviceManager, headsetListener, bluetoothScoHandler, new SystemClockWrapper());
-    }
-
-    public BluetoothHeadsetManager(
-        Context context,
-        Logger logger,
-        BluetoothAdapter bluetoothAdapter,
-        AudioDeviceManager audioDeviceManager,
-        BluetoothHeadsetConnectionListener headsetListener,
-        Handler bluetoothScoHandler,
-        SystemClockWrapper systemClockWrapper
-    ) {
-        this(
-            context,
-            logger,
-            bluetoothAdapter,
-            audioDeviceManager,
-            headsetListener,
-            bluetoothScoHandler,
-            systemClockWrapper,
-            new BluetoothIntentProcessorImpl()
-        );
-    }
-
-    public BluetoothHeadsetManager(
-        Context context,
-        Logger logger,
-        BluetoothAdapter bluetoothAdapter,
-        AudioDeviceManager audioDeviceManager,
-        BluetoothHeadsetConnectionListener headsetListener,
-        Handler bluetoothScoHandler,
-        SystemClockWrapper systemClockWrapper,
-        BluetoothIntentProcessor bluetoothIntentProcessor
-    ) {
-        this(
-            context,
-            logger,
-            bluetoothAdapter,
-            audioDeviceManager,
-            headsetListener,
-            bluetoothScoHandler,
-            systemClockWrapper,
-            bluetoothIntentProcessor,
-            null
-        );
-    }
-
-    public BluetoothHeadsetManager(
-        Context context,
-        Logger logger,
-        BluetoothAdapter bluetoothAdapter,
-        AudioDeviceManager audioDeviceManager,
-        BluetoothHeadsetConnectionListener headsetListener,
-        Handler bluetoothScoHandler,
-        SystemClockWrapper systemClockWrapper,
-        BluetoothIntentProcessor bluetoothIntentProcessor,
-        BluetoothHeadset headsetProxy
-    ) {
-        this(
-            context,
-            logger,
-            bluetoothAdapter,
-            audioDeviceManager,
-            headsetListener,
-            bluetoothScoHandler,
-            systemClockWrapper,
-            bluetoothIntentProcessor,
-            headsetProxy,
-            new BluetoothPermissionCheckStrategy(context)
-        );
-    }
-
-    public BluetoothHeadsetManager(
-        Context context,
-        Logger logger,
-        BluetoothAdapter bluetoothAdapter,
-        AudioDeviceManager audioDeviceManager,
-        BluetoothHeadsetConnectionListener headsetListener,
-        Handler bluetoothScoHandler,
-        SystemClockWrapper systemClockWrapper,
-        BluetoothIntentProcessor bluetoothIntentProcessor,
-        BluetoothHeadset headsetProxy,
-        PermissionsCheckStrategy permissionsRequestStrategy
-    ) {
-        this(
-            context,
-            logger,
-            bluetoothAdapter,
-            audioDeviceManager,
-            headsetListener,
-            bluetoothScoHandler,
-            systemClockWrapper,
-            bluetoothIntentProcessor,
-            headsetProxy,
-            permissionsRequestStrategy,
-            false
-        );
-    }
-
-    public BluetoothHeadsetManager(
-        Context context,
-        Logger logger,
-        BluetoothAdapter bluetoothAdapter,
-        AudioDeviceManager audioDeviceManager,
-        BluetoothHeadsetConnectionListener headsetListener,
-        Handler bluetoothScoHandler,
-        SystemClockWrapper systemClockWrapper,
-        BluetoothIntentProcessor bluetoothIntentProcessor,
-        BluetoothHeadset headsetProxy,
-        PermissionsCheckStrategy permissionsRequestStrategy,
-        Boolean hasRegisteredReceivers
-    ) {
+    public BluetoothHeadsetManager(Context context, Logger logger, AudioDeviceManager audioDeviceManager) {
         this.context = context;
         this.logger = logger;
-        this.bluetoothAdapter = bluetoothAdapter;
+
+        if (isAndroid12OrNewer()) {
+            final BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+            this.bluetoothAdapter = bluetoothManager.getAdapter();
+        } else {
+            this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        }
         this.audioDeviceManager = audioDeviceManager;
-        this.headsetListener = headsetListener;
-        this.bluetoothScoHandler = bluetoothScoHandler;
-        this.systemClockWrapper = systemClockWrapper;
-        this.bluetoothIntentProcessor = bluetoothIntentProcessor;
-        this.headsetProxy = headsetProxy;
-        this.permissionsRequestStrategy = permissionsRequestStrategy;
-        this.hasRegisteredReceivers = hasRegisteredReceivers;
+        this.headsetListener = null;
+        this.bluetoothScoHandler = new Handler(Looper.getMainLooper());
+        this.systemClockWrapper = new SystemClockWrapper();
+        this.bluetoothIntentProcessor = new BluetoothIntentProcessorImpl();
+        this.headsetProxy = null;
+        this.permissionsRequestStrategy = new BluetoothPermissionCheckStrategy(context);
+        this.hasRegisteredReceivers = false;
 
         this.enableBluetoothScoJob =
             new EnableBluetoothScoJob(this.logger, this.audioDeviceManager, this.bluetoothScoHandler, this.systemClockWrapper);
@@ -217,18 +87,8 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         }
     }
 
-    public static BluetoothHeadsetManager newInstance(
-        Context context,
-        Logger logger,
-        BluetoothAdapter bluetoothAdapter,
-        AudioDeviceManager audioDeviceManager
-    ) {
-        if (bluetoothAdapter != null) {
-            return new BluetoothHeadsetManager(context, logger, bluetoothAdapter, audioDeviceManager);
-        } else {
-            logger.d(TAG, "Bluetooth is not supported on this device");
-            return null;
-        }
+    private boolean isAndroid12OrNewer() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
     }
 
     @Override
@@ -278,7 +138,6 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
                         break;
                     case STATE_AUDIO_CONNECTED:
                         this.logger.d(TAG, "Bluetooth audio connected on device " + bluetoothDevice.getName());
-                        enableBluetoothScoJob.cancelBluetoothScoJob();
                         setHeadsetState(HeadsetState.AudioActivated);
                         if (headsetListener != null) {
                             headsetListener.onBluetoothHeadsetStateChanged(bluetoothDevice.getName());
@@ -286,15 +145,6 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
                         break;
                     case STATE_AUDIO_DISCONNECTED:
                         this.logger.d(TAG, "Bluetooth audio disconnected on device " + bluetoothDevice.getName());
-                        disableBluetoothScoJob.cancelBluetoothScoJob();
-                        /*
-                         * This block is needed to restart bluetooth SCO in the event that
-                         * the active bluetooth headset has changed.
-                         */
-                        if (hasActiveHeadsetChanged()) {
-                            enableBluetoothScoJob.executeBluetoothScoJob();
-                        }
-
                         if (headsetListener != null) {
                             headsetListener.onBluetoothHeadsetStateChanged(null);
                         }
@@ -335,22 +185,14 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
 
     public void activate() {
         if (hasPermissions()) {
-            if (headsetState == HeadsetState.Connected || headsetState == HeadsetState.AudioActivationError) {
-                enableBluetoothScoJob.executeBluetoothScoJob();
-            } else {
-                logger.w(TAG, "Cannot activate when in the " + headsetState.getClass().getSimpleName() + " state");
-            }
+            enableBluetoothScoJob.executeBluetoothScoJob();
         } else {
             logger.w(TAG, PERMISSION_ERROR_MESSAGE);
         }
     }
 
     public void deactivate() {
-        if (headsetState == HeadsetState.AudioActivated) {
-            disableBluetoothScoJob.executeBluetoothScoJob();
-        } else {
-            logger.w(TAG, "Cannot deactivate when in the " + headsetState.getClass().getSimpleName() + " state");
-        }
+        disableBluetoothScoJob.executeBluetoothScoJob();
     }
 
     public boolean hasActivationError() {
@@ -535,7 +377,6 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
         @Override
         protected void scoAction() {
             logger.d(TAG, "Attempting to enable bluetooth SCO");
-            audioDeviceManager.enableBluetoothSco(true);
             setHeadsetState(HeadsetState.AudioActivating);
         }
 
@@ -564,8 +405,8 @@ public class BluetoothHeadsetManager extends BroadcastReceiver implements Blueto
 
         @Override
         protected void scoAction() {
+            audioDeviceManager.disableBluetoothSco();
             logger.d(TAG, "Attempting to disable bluetooth SCO");
-            audioDeviceManager.enableBluetoothSco(false);
             setHeadsetState(HeadsetState.Connected);
         }
 

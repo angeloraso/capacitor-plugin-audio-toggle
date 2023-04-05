@@ -26,6 +26,9 @@ public class AudioDeviceManager {
     private AudioFocusRequest audioRequest = null;
     private AudioFocusRequestWrapper audioFocusRequest = new AudioFocusRequestWrapper();
     private AudioManager.OnAudioFocusChangeListener audioFocusChangeListener;
+    private boolean savedSpeakerphone = false;
+    private int savedMode;
+    public boolean isBluetoothConnected = false;
 
     public AudioDeviceManager(AppCompatActivity appCompatActivity, Context context, Logger logger, AudioManager audioManager) {
         this(appCompatActivity, context, logger, audioManager, new BuildWrapper());
@@ -84,7 +87,7 @@ public class AudioDeviceManager {
     public void setAudioFocus() {
         try {
             // Delay for Android 10/11
-            if (!isAndroid12OrNewer()) {
+            if (!isAndroid12OrNewer() || isBluetoothConnected) {
                 Thread.sleep(1250);
             }
 
@@ -93,13 +96,21 @@ public class AudioDeviceManager {
                 int res = audioManager.requestAudioFocus(audioRequest);
                 if (res == AUDIOFOCUS_REQUEST_GRANTED) {
                     appCompatActivity.setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
-                    audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                    savedSpeakerphone = audioManager.isSpeakerphoneOn();
+                    savedMode = audioManager.getMode();
+                    if (isAndroid13OrNewer()) {
+                        audioManager.setMode(AudioManager.MODE_COMMUNICATION_REDIRECT);
+                    } else {
+                        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                    }
 
                     if (isAndroid12OrNewer()) {
                         AudioDeviceInfo deviceInfo = audioManager.getCommunicationDevice();
                         if (
                             deviceInfo.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES ||
-                            deviceInfo.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET
+                            deviceInfo.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET ||
+                            deviceInfo.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO ||
+                            isBluetoothConnected
                         ) {
                             enableSpeakerphone();
                         }
@@ -112,38 +123,43 @@ public class AudioDeviceManager {
         }
     }
 
-    public void enableBluetoothSco(boolean enable) {
+    public void setBluetoothConnected(boolean connected) {
+        this.isBluetoothConnected = connected;
+    }
+
+    public void enableBluetoothSco() {
         if (isAndroid12OrNewer()) {
-            if (enable) {
-                AudioDeviceInfo bluetoothDevice = getAudioDevice(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
-                audioManager.setCommunicationDevice(bluetoothDevice);
-            } else {
-                audioManager.clearCommunicationDevice();
-            }
+            audioManager.clearCommunicationDevice();
         } else {
-            if (enable) {
-                audioManager.startBluetoothSco();
-                audioManager.setBluetoothScoOn(true);
-            } else {
-                audioManager.stopBluetoothSco();
-                audioManager.setBluetoothScoOn(false);
-            }
+            audioManager.setSpeakerphoneOn(false);
         }
+
+        audioManager.startBluetoothSco();
+        audioManager.setBluetoothScoOn(true);
+    }
+
+    public void disableBluetoothSco() {
+        audioManager.stopBluetoothSco();
+        audioManager.setBluetoothScoOn(false);
     }
 
     public void enableSpeakerphone() {
-        if (audioManager.isBluetoothScoOn()) {
-            enableBluetoothSco(false);
-        }
-
+        disableBluetoothSco();
         if (isAndroid12OrNewer()) {
             AudioDeviceInfo deviceInfo = audioManager.getCommunicationDevice();
-            if (deviceInfo.getType() == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE) {
+            if (deviceInfo.getType() == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE && !isBluetoothConnected) {
                 audioManager.clearCommunicationDevice();
-            } else {
+            } else if (
+                deviceInfo.getType() == AudioDeviceInfo.TYPE_WIRED_HEADSET ||
+                deviceInfo.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES ||
+                deviceInfo.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO ||
+                isBluetoothConnected
+            ) {
                 AudioDeviceInfo speakerphoneDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
                 boolean success = audioManager.setCommunicationDevice(speakerphoneDevice);
-                if (!success) {
+                if (success) {
+                    audioManager.setSpeakerphoneOn(true);
+                } else {
                     logger.d(TAG, "Speakerphone error");
                 }
             }
@@ -182,12 +198,12 @@ public class AudioDeviceManager {
 
     public void reset() {
         appCompatActivity.setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
-        audioManager.setMode(AudioManager.MODE_NORMAL);
+        audioManager.setMode(savedMode);
+        audioManager.setSpeakerphoneOn(savedSpeakerphone);
         if (isAndroid12OrNewer()) {
             audioManager.clearCommunicationDevice();
-        } else {
-            audioManager.setSpeakerphoneOn(true);
         }
+        disableBluetoothSco();
         if (audioRequest != null) {
             int res = audioManager.abandonAudioFocusRequest(audioRequest);
             if (res != AUDIOFOCUS_REQUEST_GRANTED) {
@@ -202,6 +218,10 @@ public class AudioDeviceManager {
 
     private boolean isAndroid12OrNewer() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
+    }
+
+    private boolean isAndroid13OrNewer() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU;
     }
 
     private AudioDeviceInfo getAudioDevice(Integer type) {

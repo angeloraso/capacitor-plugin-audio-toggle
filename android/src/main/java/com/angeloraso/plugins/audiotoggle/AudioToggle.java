@@ -52,6 +52,7 @@ public class AudioToggle {
                 bluetoothHeadsetConnected = headsetName;
                 if (headsetName != null) {
                     userSelectedDevice = new BluetoothHeadset();
+                    audioDeviceManager.setBluetoothConnected(true);
                 }
                 enumerateDevices();
             }
@@ -63,6 +64,7 @@ public class AudioToggle {
                 if (connected) {
                     userSelectedDevice = new BluetoothHeadset();
                 }
+                audioDeviceManager.setBluetoothConnected(connected);
             }
             enumerateDevices();
         }
@@ -104,8 +106,7 @@ public class AudioToggle {
         this.audioDeviceManager =
             new AudioDeviceManager(activityCompat, context, this.logger, (AudioManager) context.getSystemService(Context.AUDIO_SERVICE));
         this.wiredHeadsetReceiver = new WiredHeadsetReceiver(context, this.logger);
-        this.bluetoothHeadsetManager =
-            BluetoothHeadsetManager.newInstance(context, logger, BluetoothAdapter.getDefaultAdapter(), audioDeviceManager);
+        this.bluetoothHeadsetManager = new BluetoothHeadsetManager(context, logger, audioDeviceManager);
         this.preferredDeviceList = this.getPreferredDeviceList(defaultPreferredDeviceList);
         this.logger.d(
                 TAG,
@@ -178,10 +179,6 @@ public class AudioToggle {
         switch (state) {
             case ACTIVATED:
                 state = State.STARTED;
-                if (bluetoothHeadsetManager != null) {
-                    bluetoothHeadsetManager.deactivate();
-                }
-
                 audioDeviceManager.reset();
                 break;
             case STARTED:
@@ -247,23 +244,12 @@ public class AudioToggle {
 
     private void activate(AudioDevice audioDevice) {
         if (audioDevice instanceof BluetoothHeadset) {
-            if (bluetoothHeadsetManager != null) {
-                bluetoothHeadsetManager.activate();
-            }
+            audioDeviceManager.enableBluetoothSco();
         } else if (audioDevice instanceof Earpiece) {
-            if (bluetoothHeadsetManager != null) {
-                bluetoothHeadsetManager.deactivate();
-            }
             audioDeviceManager.enableEarpiece();
         } else if (audioDevice instanceof WiredHeadset) {
-            if (bluetoothHeadsetManager != null) {
-                bluetoothHeadsetManager.deactivate();
-            }
             audioDeviceManager.enableWired();
         } else if (audioDevice instanceof Speakerphone) {
-            if (bluetoothHeadsetManager != null) {
-                bluetoothHeadsetManager.deactivate();
-            }
             audioDeviceManager.enableSpeakerphone();
         }
     }
