@@ -64,8 +64,8 @@ public class AudioToggle {
                 if (connected) {
                     userSelectedDevice = new BluetoothHeadset();
                 }
-                audioDeviceManager.setBluetoothConnected(connected);
             }
+            audioDeviceManager.setBluetoothConnected(connected);
             enumerateDevices();
         }
 
