@@ -86,25 +86,20 @@ public class AudioDeviceManager {
 
     public void setAudioFocus() {
         try {
-            // Delay for Android 10/11
-            if (!isAndroid12OrNewer() || isBluetoothConnected) {
-                Thread.sleep(1250);
+            // Delay for no Android 12 and initial bluetooth state
+            if (Build.VERSION.SDK_INT != Build.VERSION_CODES.S || isBluetoothConnected) {
+                Thread.sleep(1300);
             }
 
             audioRequest = audioFocusRequest.buildRequest(audioFocusChangeListener);
             if (audioRequest != null) {
                 int res = audioManager.requestAudioFocus(audioRequest);
                 if (res == AUDIOFOCUS_REQUEST_GRANTED) {
-                    appCompatActivity.setVolumeControlStream(AudioManager.STREAM_VOICE_CALL);
                     savedSpeakerphone = audioManager.isSpeakerphoneOn();
                     savedMode = audioManager.getMode();
-                    if (isAndroid13OrNewer()) {
-                        audioManager.setMode(AudioManager.MODE_COMMUNICATION_REDIRECT);
-                    } else {
-                        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-                    }
+                    audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 
-                    if (isAndroid12OrNewer()) {
+                    if (isAndroid12()) {
                         AudioDeviceInfo deviceInfo = audioManager.getCommunicationDevice();
                         if (
                             deviceInfo.getType() == AudioDeviceInfo.TYPE_WIRED_HEADPHONES ||
@@ -128,8 +123,17 @@ public class AudioDeviceManager {
     }
 
     public void enableBluetoothSco() {
-        if (isAndroid12OrNewer()) {
+        if (isAndroid12()) {
             audioManager.clearCommunicationDevice();
+        } else if (isAndroid13OrNewer()) {
+            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            AudioDeviceInfo bluetoothDevice = getAudioDevice(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
+            boolean success = audioManager.setCommunicationDevice(bluetoothDevice);
+            if (success) {
+                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            } else {
+                logger.d(TAG, "Bluetooth error");
+            }
         } else {
             audioManager.setSpeakerphoneOn(false);
         }
@@ -145,7 +149,7 @@ public class AudioDeviceManager {
 
     public void enableSpeakerphone() {
         disableBluetoothSco();
-        if (isAndroid12OrNewer()) {
+        if (isAndroid12()) {
             AudioDeviceInfo deviceInfo = audioManager.getCommunicationDevice();
             if (deviceInfo.getType() == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE && !isBluetoothConnected) {
                 audioManager.clearCommunicationDevice();
@@ -163,6 +167,15 @@ public class AudioDeviceManager {
                     logger.d(TAG, "Speakerphone error");
                 }
             }
+        } else if (isAndroid13OrNewer()) {
+            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            AudioDeviceInfo speakerphoneDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
+            boolean success = audioManager.setCommunicationDevice(speakerphoneDevice);
+            if (success) {
+                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            } else {
+                logger.d(TAG, "Speakerphone error");
+            }
         } else {
             audioManager.setSpeakerphoneOn(true);
         }
@@ -171,10 +184,19 @@ public class AudioDeviceManager {
     }
 
     public void enableEarpiece() {
-        if (isAndroid12OrNewer()) {
+        if (isAndroid12()) {
             AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
             boolean success = audioManager.setCommunicationDevice(earpieceDevice);
             if (!success) {
+                logger.d(TAG, "Earpiece error");
+            }
+        } else if (isAndroid13OrNewer()) {
+            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
+            boolean success = audioManager.setCommunicationDevice(earpieceDevice);
+            if (success) {
+                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            } else {
                 logger.d(TAG, "Earpiece error");
             }
         } else {
@@ -183,8 +205,24 @@ public class AudioDeviceManager {
     }
 
     public void enableWired() {
-        if (isAndroid12OrNewer()) {
+        if (isAndroid12()) {
             audioManager.clearCommunicationDevice();
+        } else if (isAndroid13OrNewer()) {
+            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            AudioDeviceInfo wiredHeadphonesDevice = getAudioDevice(AudioDeviceInfo.TYPE_WIRED_HEADPHONES);
+            AudioDeviceInfo wiredHeadsetDevice = getAudioDevice(AudioDeviceInfo.TYPE_WIRED_HEADSET);
+            boolean success = false;
+            if (wiredHeadphonesDevice != null) {
+                success = audioManager.setCommunicationDevice(wiredHeadphonesDevice);
+            } else if (wiredHeadsetDevice != null) {
+                success = audioManager.setCommunicationDevice(wiredHeadsetDevice);
+            }
+
+            if (success) {
+                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            } else {
+                logger.d(TAG, "Wired error");
+            }
         } else {
             audioManager.setSpeakerphoneOn(false);
         }
@@ -218,6 +256,10 @@ public class AudioDeviceManager {
 
     private boolean isAndroid12OrNewer() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;
+    }
+
+    private boolean isAndroid12() {
+        return Build.VERSION.SDK_INT == Build.VERSION_CODES.S;
     }
 
     private boolean isAndroid13OrNewer() {
