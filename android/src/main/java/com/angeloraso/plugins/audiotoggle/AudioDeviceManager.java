@@ -87,7 +87,7 @@ public class AudioDeviceManager {
     public void setAudioFocus() {
         try {
             // Delay for no Android 12 and initial bluetooth state
-            if (Build.VERSION.SDK_INT != Build.VERSION_CODES.S || isBluetoothConnected) {
+            if (!isAndroid12() || isBluetoothConnected) {
                 Thread.sleep(1300);
             }
 
@@ -129,12 +129,12 @@ public class AudioDeviceManager {
             audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             AudioDeviceInfo bluetoothDevice = getAudioDevice(AudioDeviceInfo.TYPE_BLUETOOTH_SCO);
             if (bluetoothDevice != null) {
-              boolean success = audioManager.setCommunicationDevice(bluetoothDevice);
-              if (success) {
-                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-              } else {
-                logger.d(TAG, "Bluetooth error");
-              }
+                boolean success = audioManager.setCommunicationDevice(bluetoothDevice);
+                if (success) {
+                    audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                } else {
+                    logger.d(TAG, "Bluetooth error");
+                }
             }
         } else {
             audioManager.setSpeakerphoneOn(false);
@@ -163,24 +163,24 @@ public class AudioDeviceManager {
             ) {
                 AudioDeviceInfo speakerphoneDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
                 if (speakerphoneDevice != null) {
-                  boolean success = audioManager.setCommunicationDevice(speakerphoneDevice);
-                  if (success) {
-                    audioManager.setSpeakerphoneOn(true);
-                  } else {
-                    logger.d(TAG, "Speakerphone error");
-                  }
+                    boolean success = audioManager.setCommunicationDevice(speakerphoneDevice);
+                    if (success) {
+                        audioManager.setSpeakerphoneOn(true);
+                    } else {
+                        logger.d(TAG, "Speakerphone error");
+                    }
                 }
             }
         } else if (isAndroid13OrNewer()) {
             audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             AudioDeviceInfo speakerphoneDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
             if (speakerphoneDevice != null) {
-              boolean success = audioManager.setCommunicationDevice(speakerphoneDevice);
-              if (success) {
-                audioManager.setSpeakerphoneOn(true);
-              } else {
-                logger.d(TAG, "Speakerphone error");
-              }
+                boolean success = audioManager.setCommunicationDevice(speakerphoneDevice);
+                if (success) {
+                    audioManager.setSpeakerphoneOn(true);
+                } else {
+                    logger.d(TAG, "Speakerphone error");
+                }
             }
         } else {
             audioManager.setSpeakerphoneOn(true);
@@ -193,21 +193,21 @@ public class AudioDeviceManager {
         if (isAndroid12()) {
             AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
             if (earpieceDevice != null) {
-              boolean success = audioManager.setCommunicationDevice(earpieceDevice);
-              if (!success) {
-                logger.d(TAG, "Earpiece error");
-              }
+                boolean success = audioManager.setCommunicationDevice(earpieceDevice);
+                if (!success) {
+                    logger.d(TAG, "Earpiece error");
+                }
             }
         } else if (isAndroid13OrNewer()) {
             audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
             AudioDeviceInfo earpieceDevice = getAudioDevice(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
             if (earpieceDevice != null) {
-              boolean success = audioManager.setCommunicationDevice(earpieceDevice);
-              if (success) {
-                audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-              } else {
-                logger.d(TAG, "Earpiece error");
-              }
+                boolean success = audioManager.setCommunicationDevice(earpieceDevice);
+                if (success) {
+                    audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                } else {
+                    logger.d(TAG, "Earpiece error");
+                }
             }
         } else {
             audioManager.setSpeakerphoneOn(false);
